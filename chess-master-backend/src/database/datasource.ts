@@ -16,8 +16,8 @@ export const AppDataSource = new DataSource(
       }
     : {
         type: "postgres",
-        host: "localhost",
-        port: 5432,
+        host: process.env.DB_HOST || "localhost",
+        port: Number(process.env.DB_PORT) || 5432,
         username: "chessuser",
         password: "chesspass",
         database: "chess_master",

@@ -1,0 +1,21 @@
+FROM node:20-alpine
+
+# Enable pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+WORKDIR /app
+
+# Copy package metadata
+COPY package.json pnpm-lock.yaml ./
+
+# Install all deps (including nodemon)
+RUN pnpm install
+
+# Copy source code
+COPY . .
+
+# Expose backend port
+EXPOSE 3004
+
+# Start nodemon using your dev script
+CMD ["pnpm", "dev"]

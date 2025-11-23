@@ -7,7 +7,7 @@ settings:
 overrides:
   eslint-config-react-app: latest
 
-packageExtensionsChecksum: caf3522ab89d7aa7d7037e930308948b
+packageExtensionsChecksum: sha256-7A33vSrJyVIfn43D3As0y3E9M26XvkIEF0Hs6M6o0Fo=
 
 importers:
 

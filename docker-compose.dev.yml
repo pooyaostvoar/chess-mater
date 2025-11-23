@@ -1,0 +1,67 @@
+version: "3.9"
+
+services:
+  frontend:
+    build:
+      context: ./chess-master-frontend
+      dockerfile: Dockerfile.dev
+    container_name: chess_frontend_dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./chess-master-frontend:/app
+      - /app/node_modules
+      - /app/.pnpm-store
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: ./chess-master-backend
+      dockerfile: Dockerfile.dev
+    container_name: chess_backend_dev
+    ports:
+      - "3004:3004"
+    volumes:
+      - ./chess-master-backend:/app
+      - /app/node_modules
+      - /app/.pnpm-store
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_USER=chessuser
+      - DB_PASS=chesspass
+      - DB_NAME=chess_master
+      - REDIS_URL=redis://:redis-pass@redis:6379
+    depends_on:
+      - db
+      - redis
+
+  db:
+    image: postgres:15
+    container_name: chess_db_dev
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=chessuser
+      - POSTGRES_PASSWORD=chesspass
+      - POSTGRES_DB=chess_master
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    container_name: chess_redis_dev
+    command: ["redis-server", "--requirepass", "redis-pass"]
+    ports:
+      - "6378:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  postgres_data:
+  redis_data:
