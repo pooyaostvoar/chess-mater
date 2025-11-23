@@ -1,25 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getAuthUser } from '../services/auth';
 import { useUser } from '../contexts/UserContext';
 
 const Home: React.FC = () => {
 	const navigate = useNavigate();
-	const { user } = useUser();
+	const { user, loading: userLoading } = useUser();
 	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
-		const checkAuth = async () => {
-			const response = await getAuthUser();
-			if (response.status === 401) {
+		// Wait for user to load
+		if (!userLoading) {
+			if (!user) {
 				navigate('/login');
 			} else {
 				setLoading(false);
 			}
-		};
-
-		checkAuth();
-	}, [navigate]);
+		}
+	}, [user, userLoading, navigate]);
 
 	if (loading) {
 		return (
