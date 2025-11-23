@@ -7,7 +7,7 @@ export const router = Router();
 
 router.patch("/:id", isAuthenticated, async (req, res) => {
   const userId = parseInt(req.params.id, 10);
-  const { email, username, title, rating, bio, isMaster } = req.body;
+  const { email, username, title, rating, bio, isMaster, profilePicture, chesscomUrl, lichessUrl } = req.body;
 
   try {
     const userRepo = AppDataSource.getRepository(User);
@@ -23,6 +23,9 @@ router.patch("/:id", isAuthenticated, async (req, res) => {
     if (rating !== undefined) user.rating = rating;
     if (bio !== undefined) user.bio = bio;
     if (isMaster !== undefined) user.isMaster = isMaster;
+    if (profilePicture !== undefined) user.profilePicture = profilePicture;
+    if (chesscomUrl !== undefined) user.chesscomUrl = chesscomUrl;
+    if (lichessUrl !== undefined) user.lichessUrl = lichessUrl;
 
     await userRepo.save(user);
 

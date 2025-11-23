@@ -12,7 +12,13 @@ import {
 } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
-import { Crown, TrendingUp, BookOpen, ArrowRight } from 'lucide-react';
+import {
+	Crown,
+	TrendingUp,
+	BookOpen,
+	ArrowRight,
+	ExternalLink,
+} from 'lucide-react';
 
 const Home: React.FC = () => {
 	const navigate = useNavigate();
@@ -183,11 +189,19 @@ const Home: React.FC = () => {
 									className='cursor-pointer hover:shadow-lg transition-shadow'>
 									<CardHeader>
 										<div className='flex items-center gap-4 mb-4'>
-											<div className='w-16 h-16 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-white text-2xl font-bold'>
-												{master.username
-													.charAt(0)
-													.toUpperCase()}
-											</div>
+											{master.profilePicture ? (
+												<img
+													src={master.profilePicture}
+													alt={master.username}
+													className='w-16 h-16 rounded-full object-cover border-2 border-primary'
+												/>
+											) : (
+												<div className='w-16 h-16 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-white text-2xl font-bold'>
+													{master.username
+														.charAt(0)
+														.toUpperCase()}
+												</div>
+											)}
 											<div className='flex-1'>
 												<CardTitle className='text-xl'>
 													{master.username}
@@ -212,9 +226,55 @@ const Home: React.FC = () => {
 											</div>
 										)}
 										{master.bio && (
-											<CardDescription className='line-clamp-2'>
+											<CardDescription className='line-clamp-2 mb-3'>
 												{master.bio}
 											</CardDescription>
+										)}
+										{(master.chesscomUrl ||
+											master.lichessUrl) && (
+											<div className='flex gap-3 mt-3'>
+												{master.chesscomUrl && (
+													<a
+														href={
+															master.chesscomUrl.startsWith(
+																'http'
+															)
+																? master.chesscomUrl
+																: `https://www.chess.com/member/${master.chesscomUrl}`
+														}
+														target='_blank'
+														rel='noopener noreferrer'
+														className='text-xs text-primary hover:underline flex items-center gap-1'
+														onClick={(e) =>
+															e.stopPropagation()
+														}>
+														Chess.com
+														<ExternalLink className='h-3 w-3' />
+													</a>
+												)}
+												{master.lichessUrl && (
+													<a
+														href={
+															master.lichessUrl.startsWith(
+																'http'
+															)
+																? master.lichessUrl
+																: `https://lichess.org/@/${master.lichessUrl.replace(
+																		'@/',
+																		''
+																  )}`
+														}
+														target='_blank'
+														rel='noopener noreferrer'
+														className='text-xs text-primary hover:underline flex items-center gap-1'
+														onClick={(e) =>
+															e.stopPropagation()
+														}>
+														Lichess
+														<ExternalLink className='h-3 w-3' />
+													</a>
+												)}
+											</div>
 										)}
 									</CardHeader>
 									<CardContent>

@@ -1,8 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-
-const API_URL = 'http://localhost:3004';
+import { API_URL } from '../services/config';
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from '../components/ui/card';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
+import { Label } from '../components/ui/label';
+import { Badge } from '../components/ui/badge';
+import { ExternalLink, Search, X } from 'lucide-react';
 
 const Masters: React.FC = () => {
 	const [masters, setMasters] = useState<any[]>([]);
@@ -64,152 +75,239 @@ const Masters: React.FC = () => {
 		navigate(`/calendar/${userId}`);
 	};
 
+	const clearFilters = () => {
+		setSearchTerm('');
+		setMinRating('');
+		setTitleFilter('');
+	};
+
 	if (loading) {
 		return (
-			<div style={styles.loadingContainer}>
-				<div style={styles.spinner}></div>
-				<p>Loading masters...</p>
+			<div className='flex flex-col items-center justify-center min-h-[60vh]'>
+				<div className='w-10 h-10 border-4 border-gray-200 border-t-primary rounded-full animate-spin mb-5' />
+				<p className='text-muted-foreground'>Loading masters...</p>
 			</div>
 		);
 	}
 
 	if (error) {
 		return (
-			<div style={styles.errorContainer}>
-				<p style={styles.error}>{error}</p>
+			<div className='flex justify-center items-center min-h-[60vh]'>
+				<Card className='max-w-md'>
+					<CardContent className='pt-6'>
+						<p className='text-destructive text-center'>{error}</p>
+					</CardContent>
+				</Card>
 			</div>
 		);
 	}
 
 	return (
-		<div style={styles.container}>
-			<div style={styles.header}>
-				<h1 style={styles.pageTitle}>Find Your Chess Master</h1>
-				<p style={styles.pageSubtitle}>
+		<div className='max-w-7xl mx-auto px-5 py-10'>
+			<div className='text-center mb-12'>
+				<h1 className='text-4xl md:text-5xl font-bold mb-4'>
+					Find Your Chess Master
+				</h1>
+				<p className='text-lg text-muted-foreground'>
 					Browse and book sessions with experienced chess masters
 				</p>
 			</div>
 
-			<div style={styles.filterSection}>
-				<div style={styles.filterGrid}>
-					<div style={styles.filterGroup}>
-						<label style={styles.filterLabel}>Search by name</label>
-						<input
-							type='text'
-							placeholder='Search masters...'
-							value={searchTerm}
-							onChange={(e) => setSearchTerm(e.target.value)}
-							style={styles.input}
-						/>
+			<Card className='mb-8'>
+				<CardHeader>
+					<CardTitle>Filter Masters</CardTitle>
+				</CardHeader>
+				<CardContent>
+					<div className='grid grid-cols-1 md:grid-cols-3 gap-4 mb-4'>
+						<div>
+							<Label htmlFor='search'>Search by name</Label>
+							<div className='relative'>
+								<Search className='absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground' />
+								<Input
+									id='search'
+									type='text'
+									placeholder='Search masters...'
+									value={searchTerm}
+									onChange={(e) =>
+										setSearchTerm(e.target.value)
+									}
+									className='pl-10'
+								/>
+							</div>
+						</div>
+
+						<div>
+							<Label htmlFor='rating'>Minimum rating</Label>
+							<Input
+								id='rating'
+								type='number'
+								placeholder='e.g., 2000'
+								value={minRating}
+								onChange={(e) => setMinRating(e.target.value)}
+							/>
+						</div>
+
+						<div>
+							<Label htmlFor='title'>Title</Label>
+							<select
+								id='title'
+								value={titleFilter}
+								onChange={(e) => setTitleFilter(e.target.value)}
+								className='flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'>
+								<option value=''>All titles</option>
+								<option value='GM'>GM</option>
+								<option value='IM'>IM</option>
+								<option value='FM'>FM</option>
+								<option value='CM'>CM</option>
+							</select>
+						</div>
 					</div>
 
-					<div style={styles.filterGroup}>
-						<label style={styles.filterLabel}>Minimum rating</label>
-						<input
-							type='number'
-							placeholder='e.g., 2000'
-							value={minRating}
-							onChange={(e) => setMinRating(e.target.value)}
-							style={styles.input}
-						/>
-					</div>
-
-					<div style={styles.filterGroup}>
-						<label style={styles.filterLabel}>Title</label>
-						<select
-							value={titleFilter}
-							onChange={(e) => setTitleFilter(e.target.value)}
-							style={styles.select}>
-							<option value=''>All titles</option>
-							<option value='GM'>GM</option>
-							<option value='IM'>IM</option>
-							<option value='FM'>FM</option>
-							<option value='CM'>CM</option>
-						</select>
-					</div>
-				</div>
-
-				{(searchTerm || minRating || titleFilter) && (
-					<button
-						style={styles.clearButton}
-						onClick={() => {
-							setSearchTerm('');
-							setMinRating('');
-							setTitleFilter('');
-						}}>
-						Clear filters
-					</button>
-				)}
-			</div>
+					{(searchTerm || minRating || titleFilter) && (
+						<Button
+							variant='outline'
+							size='sm'
+							onClick={clearFilters}
+							className='w-full md:w-auto'>
+							<X className='mr-2 h-4 w-4' />
+							Clear filters
+						</Button>
+					)}
+				</CardContent>
+			</Card>
 
 			{filteredMasters.length === 0 ? (
-				<div style={styles.noResults}>
-					<p style={styles.noResultsText}>
-						No masters found matching your criteria
-					</p>
-					<button
-						style={styles.clearButton}
-						onClick={() => {
-							setSearchTerm('');
-							setMinRating('');
-							setTitleFilter('');
-						}}>
-						Clear filters
-					</button>
-				</div>
+				<Card className='text-center py-12'>
+					<CardContent>
+						<p className='text-muted-foreground mb-4'>
+							No masters found matching your criteria
+						</p>
+						{(searchTerm || minRating || titleFilter) && (
+							<Button
+								variant='outline'
+								onClick={clearFilters}>
+								Clear filters
+							</Button>
+						)}
+					</CardContent>
+				</Card>
 			) : (
 				<>
-					<div style={styles.resultsCount}>
-						{filteredMasters.length} master
-						{filteredMasters.length !== 1 && 's'} found
+					<div className='mb-6'>
+						<p className='text-muted-foreground'>
+							{filteredMasters.length} master
+							{filteredMasters.length !== 1 && 's'} found
+						</p>
 					</div>
 
-					<div style={styles.list}>
-						{filteredMasters.map((m) => (
-							<div
-								key={m.id}
-								style={styles.card}>
-								<div style={styles.cardHeader}>
-									<div style={styles.avatar}>
-										{m.username.charAt(0).toUpperCase()}
-									</div>
-									<div style={styles.cardHeaderInfo}>
-										<h3 style={styles.name}>
-											{m.username}
-										</h3>
-										{m.title && (
-											<span style={styles.titleTag}>
-												{m.title}
-											</span>
+					<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+						{filteredMasters.map((master) => (
+							<Card
+								key={master.id}
+								className='hover:shadow-lg transition-shadow'>
+								<CardHeader>
+									<div className='flex items-center gap-4 mb-4'>
+										{master.profilePicture ? (
+											<img
+												src={master.profilePicture}
+												alt={master.username}
+												className='w-16 h-16 rounded-full object-cover border-2 border-primary'
+											/>
+										) : (
+											<div className='w-16 h-16 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-white text-2xl font-bold'>
+												{master.username
+													.charAt(0)
+													.toUpperCase()}
+											</div>
 										)}
+										<div className='flex-1'>
+											<CardTitle className='text-xl'>
+												{master.username}
+											</CardTitle>
+											{master.title && (
+												<Badge
+													variant='default'
+													className='mt-1'>
+													{master.title}
+												</Badge>
+											)}
+										</div>
 									</div>
-								</div>
 
-								<div style={styles.cardBody}>
-									{m.rating && (
-										<div style={styles.ratingSection}>
-											<span style={styles.ratingLabel}>
-												Rating:
+									{master.rating && (
+										<div className='mb-3'>
+											<span className='text-sm text-muted-foreground'>
+												Rating:{' '}
 											</span>
-											<span style={styles.ratingValue}>
-												{m.rating}
+											<span className='text-lg font-bold'>
+												{master.rating}
 											</span>
 										</div>
 									)}
 
-									{m.bio && <p style={styles.bio}>{m.bio}</p>}
-								</div>
+									{master.bio && (
+										<CardDescription className='line-clamp-2 mb-3'>
+											{master.bio}
+										</CardDescription>
+									)}
 
-								<div style={styles.cardFooter}>
-									<button
-										style={styles.scheduleButton}
+									{(master.chesscomUrl ||
+										master.lichessUrl) && (
+										<div className='flex gap-3 mt-3'>
+											{master.chesscomUrl && (
+												<a
+													href={
+														master.chesscomUrl.startsWith(
+															'http'
+														)
+															? master.chesscomUrl
+															: `https://www.chess.com/member/${master.chesscomUrl}`
+													}
+													target='_blank'
+													rel='noopener noreferrer'
+													className='text-xs text-primary hover:underline flex items-center gap-1'
+													onClick={(e) =>
+														e.stopPropagation()
+													}>
+													Chess.com
+													<ExternalLink className='h-3 w-3' />
+												</a>
+											)}
+											{master.lichessUrl && (
+												<a
+													href={
+														master.lichessUrl.startsWith(
+															'http'
+														)
+															? master.lichessUrl
+															: `https://lichess.org/@/${master.lichessUrl.replace(
+																	'@/',
+																	''
+															  )}`
+													}
+													target='_blank'
+													rel='noopener noreferrer'
+													className='text-xs text-primary hover:underline flex items-center gap-1'
+													onClick={(e) =>
+														e.stopPropagation()
+													}>
+													Lichess
+													<ExternalLink className='h-3 w-3' />
+												</a>
+											)}
+										</div>
+									)}
+								</CardHeader>
+								<CardContent>
+									<Button
+										className='w-full'
 										onClick={() =>
-											handleScheduleClick(m.id)
+											handleScheduleClick(master.id)
 										}>
 										View Schedule
-									</button>
-								</div>
-							</div>
+									</Button>
+								</CardContent>
+							</Card>
 						))}
 					</div>
 				</>
@@ -219,223 +317,3 @@ const Masters: React.FC = () => {
 };
 
 export default Masters;
-
-const styles: Record<string, React.CSSProperties> = {
-	container: {
-		maxWidth: '1200px',
-		margin: '0 auto',
-		padding: '40px 20px',
-	},
-	loadingContainer: {
-		display: 'flex',
-		flexDirection: 'column',
-		alignItems: 'center',
-		justifyContent: 'center',
-		minHeight: '60vh',
-		color: '#7f8c8d',
-	},
-	spinner: {
-		width: '40px',
-		height: '40px',
-		border: '4px solid #e0e0e0',
-		borderTop: '4px solid #3498db',
-		borderRadius: '50%',
-		animation: 'spin 1s linear infinite',
-		marginBottom: '20px',
-	},
-	errorContainer: {
-		display: 'flex',
-		justifyContent: 'center',
-		alignItems: 'center',
-		minHeight: '60vh',
-	},
-	error: {
-		color: '#e74c3c',
-		fontSize: '18px',
-		padding: '20px',
-		background: '#fee',
-		borderRadius: '8px',
-	},
-	header: {
-		textAlign: 'center',
-		marginBottom: '48px',
-	},
-	pageTitle: {
-		fontSize: '42px',
-		fontWeight: 700,
-		color: '#2c3e50',
-		marginBottom: '12px',
-		lineHeight: 1.2,
-	},
-	pageSubtitle: {
-		fontSize: '18px',
-		color: '#7f8c8d',
-		lineHeight: 1.6,
-	},
-	filterSection: {
-		background: 'white',
-		padding: '24px',
-		borderRadius: '12px',
-		boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
-		marginBottom: '32px',
-	},
-	filterGrid: {
-		display: 'grid',
-		gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-		gap: '20px',
-		marginBottom: '16px',
-	},
-	filterGroup: {
-		display: 'flex',
-		flexDirection: 'column',
-		gap: '8px',
-	},
-	filterLabel: {
-		fontSize: '14px',
-		fontWeight: 600,
-		color: '#2c3e50',
-	},
-	input: {
-		padding: '10px 14px',
-		fontSize: '15px',
-		borderRadius: '8px',
-		border: '2px solid #e0e0e0',
-		outline: 'none',
-		transition: 'all 0.2s ease',
-		fontFamily: 'inherit',
-	},
-	select: {
-		padding: '10px 14px',
-		fontSize: '15px',
-		borderRadius: '8px',
-		border: '2px solid #e0e0e0',
-		outline: 'none',
-		transition: 'all 0.2s ease',
-		fontFamily: 'inherit',
-		background: 'white',
-		cursor: 'pointer',
-	},
-	clearButton: {
-		padding: '8px 16px',
-		background: '#e0e0e0',
-		color: '#2c3e50',
-		border: 'none',
-		borderRadius: '6px',
-		cursor: 'pointer',
-		fontSize: '14px',
-		fontWeight: 500,
-		transition: 'all 0.2s ease',
-	},
-	resultsCount: {
-		fontSize: '16px',
-		color: '#7f8c8d',
-		marginBottom: '24px',
-		fontWeight: 500,
-	},
-	noResults: {
-		textAlign: 'center',
-		padding: '60px 20px',
-		background: 'white',
-		borderRadius: '12px',
-		boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
-	},
-	noResultsText: {
-		fontSize: '18px',
-		color: '#7f8c8d',
-		marginBottom: '20px',
-	},
-	list: {
-		display: 'grid',
-		gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
-		gap: '24px',
-	},
-	card: {
-		display: 'flex',
-		flexDirection: 'column',
-		background: '#fff',
-		padding: '24px',
-		borderRadius: '16px',
-		boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-		transition: 'all 0.3s ease',
-	},
-	cardHeader: {
-		display: 'flex',
-		alignItems: 'center',
-		gap: '16px',
-		marginBottom: '20px',
-		paddingBottom: '20px',
-		borderBottom: '1px solid #e0e0e0',
-	},
-	avatar: {
-		width: '56px',
-		height: '56px',
-		borderRadius: '50%',
-		background: 'linear-gradient(135deg, #3498db 0%, #2980b9 100%)',
-		display: 'flex',
-		alignItems: 'center',
-		justifyContent: 'center',
-		color: 'white',
-		fontSize: '24px',
-		fontWeight: 700,
-		flexShrink: 0,
-	},
-	cardHeaderInfo: {
-		flex: 1,
-	},
-	name: {
-		fontSize: '22px',
-		fontWeight: 700,
-		color: '#2c3e50',
-		marginBottom: '6px',
-	},
-	titleTag: {
-		background: 'linear-gradient(135deg, #3498db 0%, #2980b9 100%)',
-		color: 'white',
-		display: 'inline-block',
-		padding: '4px 12px',
-		borderRadius: '6px',
-		fontSize: '13px',
-		fontWeight: 600,
-	},
-	cardBody: {
-		flex: 1,
-		marginBottom: '20px',
-	},
-	ratingSection: {
-		display: 'flex',
-		alignItems: 'center',
-		gap: '8px',
-		marginBottom: '16px',
-	},
-	ratingLabel: {
-		fontSize: '14px',
-		color: '#7f8c8d',
-	},
-	ratingValue: {
-		fontSize: '20px',
-		fontWeight: 700,
-		color: '#2c3e50',
-	},
-	bio: {
-		fontSize: '15px',
-		lineHeight: 1.6,
-		color: '#7f8c8d',
-		fontStyle: 'italic',
-	},
-	cardFooter: {
-		paddingTop: '16px',
-		borderTop: '1px solid #e0e0e0',
-	},
-	scheduleButton: {
-		width: '100%',
-		padding: '12px',
-		background: 'linear-gradient(135deg, #3498db 0%, #2980b9 100%)',
-		color: '#fff',
-		border: 'none',
-		borderRadius: '8px',
-		cursor: 'pointer',
-		fontWeight: 600,
-		fontSize: '15px',
-		transition: 'all 0.3s ease',
-	},
-};

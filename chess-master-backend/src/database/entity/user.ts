@@ -24,6 +24,15 @@ export class User {
   @Column("text", { nullable: true })
   bio: string | null;
 
+  @Column("text", { nullable: true })
+  profilePicture: string | null;
+
+  @Column("text", { nullable: true })
+  chesscomUrl: string | null;
+
+  @Column("text", { nullable: true })
+  lichessUrl: string | null;
+
   @Column("bytea")
   password: Buffer;
 

@@ -68,8 +68,16 @@ const Layout: React.FC = () => {
 							) : user ? (
 								<DropdownMenu>
 									<DropdownMenuTrigger asChild>
-										<button className='w-11 h-11 rounded-full bg-white text-slate-900 font-bold text-lg flex items-center justify-center hover:ring-2 hover:ring-primary transition-all'>
-											{firstLetter}
+										<button className='w-11 h-11 rounded-full bg-white text-slate-900 font-bold text-lg flex items-center justify-center hover:ring-2 hover:ring-primary transition-all overflow-hidden'>
+											{user.profilePicture ? (
+												<img
+													src={user.profilePicture}
+													alt={user.username}
+													className='w-full h-full object-cover'
+												/>
+											) : (
+												firstLetter
+											)}
 										</button>
 									</DropdownMenuTrigger>
 									<DropdownMenuContent

@@ -1,351 +1,382 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { getMe, updateUser } from "../services/auth";
-import { useUser } from "../contexts/UserContext";
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { getMe, updateUser } from '../services/auth';
+import { useUser } from '../contexts/UserContext';
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from '../components/ui/card';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
+import { Label } from '../components/ui/label';
+import { Textarea } from '../components/ui/textarea';
+import { Upload, X } from 'lucide-react';
 
 const EditProfile: React.FC = () => {
-  const [formData, setFormData] = useState<any>(null);
-  const [message, setMessage] = useState("");
-  const [messageType, setMessageType] = useState<"success" | "error">("success");
-  const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
-  const { setUser } = useUser();
+	const [formData, setFormData] = useState<any>(null);
+	const [message, setMessage] = useState('');
+	const [messageType, setMessageType] = useState<'success' | 'error'>(
+		'success'
+	);
+	const [loading, setLoading] = useState(false);
+	const [previewImage, setPreviewImage] = useState<string | null>(null);
+	const navigate = useNavigate();
+	const { setUser } = useUser();
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      const response = await getMe();
-      if (!response.user) {
-        navigate("/login");
-      } else {
-        setFormData(response.user);
-      }
-    };
+	useEffect(() => {
+		const checkAuth = async () => {
+			const response = await getMe();
+			if (!response.user) {
+				navigate('/login');
+			} else {
+				setFormData(response.user);
+				if (response.user.profilePicture) {
+					setPreviewImage(response.user.profilePicture);
+				}
+			}
+		};
 
-    checkAuth();
-  }, [navigate]);
+		checkAuth();
+	}, [navigate]);
 
-  if (!formData) {
-    return (
-      <div style={styles.loadingContainer}>
-        <div style={styles.spinner}></div>
-        <p>Loading profile...</p>
-      </div>
-    );
-  }
+	if (!formData) {
+		return (
+			<div className='flex flex-col items-center justify-center min-h-[60vh]'>
+				<div className='w-10 h-10 border-4 border-gray-200 border-t-primary rounded-full animate-spin mb-5' />
+				<p className='text-muted-foreground'>Loading profile...</p>
+			</div>
+		);
+	}
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+	const handleChange = (
+		e: React.ChangeEvent<
+			HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+		>
+	) => {
+		setFormData({ ...formData, [e.target.name]: e.target.value });
+	};
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setMessage("");
+	const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const file = e.target.files?.[0];
+		if (file) {
+			// Validate file type
+			if (!file.type.startsWith('image/')) {
+				setMessage('Please select an image file');
+				setMessageType('error');
+				return;
+			}
 
-    try {
-      const data = await updateUser(formData.id, {
-        email: formData.email,
-        username: formData.username,
-        title: formData.title,
-        rating: formData.rating,
-        bio: formData.bio,
-        isMaster: formData.isMaster,
-      });
+			// Validate file size (max 2MB)
+			if (file.size > 2 * 1024 * 1024) {
+				setMessage('Image size should be less than 2MB');
+				setMessageType('error');
+				return;
+			}
 
-      if (data.status === "success") {
-        setMessage("Profile updated successfully!");
-        setMessageType("success");
-        setUser(data.user);
-      } else {
-        setMessage("Something went wrong");
-        setMessageType("error");
-      }
-    } catch (err) {
-      console.error(err);
-      setMessage("Error updating profile");
-      setMessageType("error");
-    } finally {
-      setLoading(false);
-    }
-  };
+			const reader = new FileReader();
+			reader.onloadend = () => {
+				const base64String = reader.result as string;
+				setPreviewImage(base64String);
+				setFormData({ ...formData, profilePicture: base64String });
+			};
+			reader.readAsDataURL(file);
+		}
+	};
 
-  return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <div style={styles.header}>
-          <h2 style={styles.heading}>Edit Profile</h2>
-          <p style={styles.subtitle}>Update your account information</p>
-        </div>
+	const removeImage = () => {
+		setPreviewImage(null);
+		setFormData({ ...formData, profilePicture: null });
+	};
 
-        <form onSubmit={handleSubmit} style={styles.form}>
-          <div style={styles.section}>
-            <h3 style={styles.sectionTitle}>Basic Information</h3>
+	const handleSubmit = async (e: React.FormEvent) => {
+		e.preventDefault();
+		setLoading(true);
+		setMessage('');
 
-            <div style={styles.inputGroup}>
-              <label style={styles.label}>Username</label>
-              <input
-                type="text"
-                name="username"
-                value={formData.username || ""}
-                onChange={handleChange}
-                style={styles.input}
-                placeholder="Your username"
-              />
-            </div>
+		try {
+			const data = await updateUser(formData.id, {
+				email: formData.email,
+				username: formData.username,
+				title: formData.title,
+				rating: formData.rating,
+				bio: formData.bio,
+				isMaster: formData.isMaster,
+				profilePicture: formData.profilePicture,
+				chesscomUrl: formData.chesscomUrl,
+				lichessUrl: formData.lichessUrl,
+			});
 
-            <div style={styles.inputGroup}>
-              <label style={styles.label}>Email</label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email || ""}
-                onChange={handleChange}
-                style={styles.input}
-                placeholder="your.email@example.com"
-              />
-            </div>
-          </div>
+			if (data.status === 'success') {
+				setMessage('Profile updated successfully!');
+				setMessageType('success');
+				setUser(data.user);
+			} else {
+				setMessage('Something went wrong');
+				setMessageType('error');
+			}
+		} catch (err) {
+			console.error(err);
+			setMessage('Error updating profile');
+			setMessageType('error');
+		} finally {
+			setLoading(false);
+		}
+	};
 
-          <div style={styles.section}>
-            <h3 style={styles.sectionTitle}>Chess Profile</h3>
+	return (
+		<div className='max-w-3xl mx-auto px-5 py-10'>
+			<Card>
+				<CardHeader>
+					<CardTitle className='text-3xl'>Edit Profile</CardTitle>
+					<CardDescription>
+						Update your account information
+					</CardDescription>
+				</CardHeader>
+				<CardContent>
+					<form
+						onSubmit={handleSubmit}
+						className='space-y-8'>
+						{/* Profile Picture Section */}
+						<div className='space-y-4'>
+							<h3 className='text-xl font-semibold'>
+								Profile Picture
+							</h3>
+							<div className='flex items-start gap-6'>
+								<div className='flex-shrink-0'>
+									{previewImage ? (
+										<div className='relative'>
+											<img
+												src={previewImage}
+												alt='Profile preview'
+												className='w-32 h-32 rounded-full object-cover border-4 border-primary'
+											/>
+											<button
+												type='button'
+												onClick={removeImage}
+												className='absolute -top-2 -right-2 w-6 h-6 rounded-full bg-destructive text-white flex items-center justify-center hover:bg-destructive/90'>
+												<X className='h-4 w-4' />
+											</button>
+										</div>
+									) : (
+										<div className='w-32 h-32 rounded-full bg-muted flex items-center justify-center border-4 border-primary'>
+											<span className='text-4xl font-bold text-muted-foreground'>
+												{formData.username
+													?.charAt(0)
+													.toUpperCase() || '?'}
+											</span>
+										</div>
+									)}
+								</div>
+								<div className='flex-1'>
+									<Label
+										htmlFor='profilePicture'
+										className='mb-2 block'>
+										Upload Profile Picture
+									</Label>
+									<div className='flex items-center gap-4'>
+										<Label
+											htmlFor='profilePicture'
+											className='cursor-pointer inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors'>
+											<Upload className='h-4 w-4' />
+											Choose Image
+										</Label>
+										<Input
+											id='profilePicture'
+											type='file'
+											accept='image/*'
+											onChange={handleImageChange}
+											className='hidden'
+										/>
+										<p className='text-sm text-muted-foreground'>
+											JPG, PNG or GIF. Max size 2MB
+										</p>
+									</div>
+								</div>
+							</div>
+						</div>
 
-            <div style={styles.inputGroup}>
-              <label style={styles.label}>Chess Title (optional)</label>
-              <select
-                name="title"
-                value={formData.title || ""}
-                onChange={(e: any) => handleChange(e)}
-                style={styles.select}
-              >
-                <option value="">No title</option>
-                <option value="CM">CM - Candidate Master</option>
-                <option value="FM">FM - FIDE Master</option>
-                <option value="IM">IM - International Master</option>
-                <option value="GM">GM - Grandmaster</option>
-              </select>
-            </div>
+						{/* Basic Information */}
+						<div className='space-y-4'>
+							<h3 className='text-xl font-semibold'>
+								Basic Information
+							</h3>
+							<div className='space-y-4'>
+								<div>
+									<Label htmlFor='username'>Username</Label>
+									<Input
+										id='username'
+										type='text'
+										name='username'
+										value={formData.username || ''}
+										onChange={handleChange}
+										placeholder='Your username'
+									/>
+								</div>
 
-            <div style={styles.inputGroup}>
-              <label style={styles.label}>Rating (optional)</label>
-              <input
-                type="number"
-                name="rating"
-                value={formData.rating || ""}
-                onChange={handleChange}
-                style={styles.input}
-                placeholder="e.g., 2000"
-              />
-            </div>
+								<div>
+									<Label htmlFor='email'>Email</Label>
+									<Input
+										id='email'
+										type='email'
+										name='email'
+										value={formData.email || ''}
+										onChange={handleChange}
+										placeholder='your.email@example.com'
+									/>
+								</div>
+							</div>
+						</div>
 
-            <div style={styles.inputGroup}>
-              <label style={styles.label}>Bio (optional)</label>
-              <textarea
-                name="bio"
-                value={formData.bio || ""}
-                onChange={handleChange}
-                style={styles.textarea}
-                placeholder="Tell us about your chess journey..."
-                rows={4}
-              />
-            </div>
-          </div>
+						{/* Chess Profile */}
+						<div className='space-y-4'>
+							<h3 className='text-xl font-semibold'>
+								Chess Profile
+							</h3>
+							<div className='space-y-4'>
+								<div>
+									<Label htmlFor='title'>
+										Chess Title (optional)
+									</Label>
+									<select
+										id='title'
+										name='title'
+										value={formData.title || ''}
+										onChange={handleChange}
+										className='flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50'>
+										<option value=''>No title</option>
+										<option value='CM'>
+											CM - Candidate Master
+										</option>
+										<option value='FM'>
+											FM - FIDE Master
+										</option>
+										<option value='IM'>
+											IM - International Master
+										</option>
+										<option value='GM'>
+											GM - Grandmaster
+										</option>
+									</select>
+								</div>
 
-          <div style={styles.section}>
-            <h3 style={styles.sectionTitle}>Account Type</h3>
+								<div>
+									<Label htmlFor='rating'>
+										Rating (optional)
+									</Label>
+									<Input
+										id='rating'
+										type='number'
+										name='rating'
+										value={formData.rating || ''}
+										onChange={handleChange}
+										placeholder='e.g., 2000'
+									/>
+								</div>
 
-            <div style={styles.checkboxWrapper}>
-              <label style={styles.checkboxLabel}>
-                <input
-                  type="checkbox"
-                  name="isMaster"
-                  checked={!!formData.isMaster}
-                  onChange={(e) =>
-                    setFormData((prev: any) => ({
-                      ...prev,
-                      isMaster: e.target.checked,
-                    }))
-                  }
-                  style={styles.checkbox}
-                />
-                <span style={styles.checkboxText}>
-                  I am a chess master and want to offer coaching sessions
-                </span>
-              </label>
-            </div>
-          </div>
+								<div>
+									<Label htmlFor='bio'>Bio (optional)</Label>
+									<Textarea
+										id='bio'
+										name='bio'
+										value={formData.bio || ''}
+										onChange={handleChange}
+										placeholder='Tell us about your chess journey...'
+										rows={4}
+									/>
+								</div>
+							</div>
+						</div>
 
-          <button
-            type="submit"
-            style={{
-              ...styles.button,
-              opacity: loading ? 0.7 : 1,
-              cursor: loading ? "not-allowed" : "pointer",
-            }}
-            disabled={loading}
-          >
-            {loading ? "Saving..." : "Save Changes"}
-          </button>
-        </form>
+						{/* Chess Platform URLs */}
+						<div className='space-y-4'>
+							<h3 className='text-xl font-semibold'>
+								Chess Platform Profiles
+							</h3>
+							<div className='space-y-4'>
+								<div>
+									<Label htmlFor='chesscomUrl'>
+										Chess.com Username/URL (optional)
+									</Label>
+									<Input
+										id='chesscomUrl'
+										type='text'
+										name='chesscomUrl'
+										value={formData.chesscomUrl || ''}
+										onChange={handleChange}
+										placeholder='e.g., username or https://www.chess.com/member/username'
+									/>
+								</div>
 
-        {message && (
-          <div
-            style={{
-              ...styles.message,
-              background: messageType === "success" ? "#e8f8f5" : "#fee",
-              color: messageType === "success" ? "#27ae60" : "#e74c3c",
-            }}
-          >
-            {message}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
+								<div>
+									<Label htmlFor='lichessUrl'>
+										Lichess Username/URL (optional)
+									</Label>
+									<Input
+										id='lichessUrl'
+										type='text'
+										name='lichessUrl'
+										value={formData.lichessUrl || ''}
+										onChange={handleChange}
+										placeholder='e.g., username or https://lichess.org/@/username'
+									/>
+								</div>
+							</div>
+						</div>
 
-const styles: Record<string, React.CSSProperties> = {
-  container: {
-    maxWidth: "700px",
-    margin: "0 auto",
-    padding: "40px 20px",
-  },
-  loadingContainer: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    minHeight: "60vh",
-    color: "#7f8c8d",
-  },
-  spinner: {
-    width: "40px",
-    height: "40px",
-    border: "4px solid #e0e0e0",
-    borderTop: "4px solid #3498db",
-    borderRadius: "50%",
-    animation: "spin 1s linear infinite",
-    marginBottom: "20px",
-  },
-  card: {
-    background: "#fff",
-    borderRadius: "16px",
-    padding: "40px",
-    boxShadow: "0 10px 40px rgba(0,0,0,0.1)",
-  },
-  header: {
-    marginBottom: "32px",
-  },
-  heading: {
-    fontSize: "32px",
-    fontWeight: 700,
-    color: "#2c3e50",
-    marginBottom: "8px",
-  },
-  subtitle: {
-    fontSize: "16px",
-    color: "#7f8c8d",
-  },
-  form: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "32px",
-  },
-  section: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "20px",
-  },
-  sectionTitle: {
-    fontSize: "20px",
-    fontWeight: 600,
-    color: "#2c3e50",
-    marginBottom: "8px",
-    paddingBottom: "12px",
-    borderBottom: "2px solid #e0e0e0",
-  },
-  inputGroup: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "8px",
-  },
-  label: {
-    fontSize: "14px",
-    fontWeight: 600,
-    color: "#2c3e50",
-  },
-  input: {
-    padding: "12px 16px",
-    fontSize: "15px",
-    borderRadius: "8px",
-    border: "2px solid #e0e0e0",
-    outline: "none",
-    transition: "all 0.2s ease",
-    fontFamily: "inherit",
-  },
-  select: {
-    padding: "12px 16px",
-    fontSize: "15px",
-    borderRadius: "8px",
-    border: "2px solid #e0e0e0",
-    outline: "none",
-    transition: "all 0.2s ease",
-    fontFamily: "inherit",
-    background: "white",
-    cursor: "pointer",
-  },
-  textarea: {
-    padding: "12px 16px",
-    fontSize: "15px",
-    borderRadius: "8px",
-    border: "2px solid #e0e0e0",
-    outline: "none",
-    transition: "all 0.2s ease",
-    fontFamily: "inherit",
-    resize: "vertical",
-  },
-  checkboxWrapper: {
-    background: "#f8f9fa",
-    padding: "16px",
-    borderRadius: "8px",
-  },
-  checkboxLabel: {
-    display: "flex",
-    alignItems: "center",
-    gap: "12px",
-    cursor: "pointer",
-  },
-  checkbox: {
-    width: "20px",
-    height: "20px",
-    cursor: "pointer",
-    flexShrink: 0,
-  },
-  checkboxText: {
-    fontSize: "15px",
-    color: "#2c3e50",
-    lineHeight: 1.5,
-  },
-  button: {
-    padding: "14px",
-    background: "linear-gradient(135deg, #3498db 0%, #2980b9 100%)",
-    color: "#fff",
-    fontWeight: 600,
-    fontSize: "16px",
-    borderRadius: "8px",
-    border: "none",
-    cursor: "pointer",
-    transition: "all 0.3s ease",
-  },
-  message: {
-    marginTop: "20px",
-    padding: "16px",
-    borderRadius: "8px",
-    textAlign: "center",
-    fontSize: "15px",
-    fontWeight: 500,
-  },
+						{/* Account Type */}
+						<div className='space-y-4'>
+							<h3 className='text-xl font-semibold'>
+								Account Type
+							</h3>
+							<div className='flex items-center space-x-2 p-4 bg-muted rounded-lg'>
+								<input
+									type='checkbox'
+									id='isMaster'
+									name='isMaster'
+									checked={!!formData.isMaster}
+									onChange={(e) =>
+										setFormData((prev: any) => ({
+											...prev,
+											isMaster: e.target.checked,
+										}))
+									}
+									className='h-4 w-4 rounded border-gray-300'
+								/>
+								<Label
+									htmlFor='isMaster'
+									className='cursor-pointer'>
+									I am a chess master and want to offer
+									coaching sessions
+								</Label>
+							</div>
+						</div>
+
+						<Button
+							type='submit'
+							disabled={loading}
+							className='w-full'
+							size='lg'>
+							{loading ? 'Saving...' : 'Save Changes'}
+						</Button>
+
+						{message && (
+							<div
+								className={`p-4 rounded-md text-center ${
+									messageType === 'success'
+										? 'bg-green-50 text-green-800'
+										: 'bg-red-50 text-red-800'
+								}`}>
+								{message}
+							</div>
+						)}
+					</form>
+				</CardContent>
+			</Card>
+		</div>
+	);
 };
 
 export default EditProfile;
