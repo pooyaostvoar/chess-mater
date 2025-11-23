@@ -13,7 +13,7 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Textarea } from '../components/ui/textarea';
-import { Upload, X } from 'lucide-react';
+import { Upload, X, DollarSign, Clock } from 'lucide-react';
 
 const EditProfile: React.FC = () => {
 	const [formData, setFormData] = useState<any>(null);
@@ -32,7 +32,17 @@ const EditProfile: React.FC = () => {
 			if (!response.user) {
 				navigate('/login');
 			} else {
-				setFormData(response.user);
+				// Flatten pricing into formData for easier form handling
+				const userData = {
+					...response.user,
+					price5min: response.user.pricing?.price5min || null,
+					price10min: response.user.pricing?.price10min || null,
+					price15min: response.user.pricing?.price15min || null,
+					price30min: response.user.pricing?.price30min || null,
+					price45min: response.user.pricing?.price45min || null,
+					price60min: response.user.pricing?.price60min || null,
+				};
+				setFormData(userData);
 				if (response.user.profilePicture) {
 					setPreviewImage(response.user.profilePicture);
 				}
@@ -134,6 +144,14 @@ const EditProfile: React.FC = () => {
 				profilePicture: formData.profilePicture,
 				chesscomUrl: formData.chesscomUrl,
 				lichessUrl: formData.lichessUrl,
+				pricing: {
+					price5min: formData.price5min,
+					price10min: formData.price10min,
+					price15min: formData.price15min,
+					price30min: formData.price30min,
+					price45min: formData.price45min,
+					price60min: formData.price60min,
+				},
 			});
 
 			if (data.status === 'success') {
@@ -362,6 +380,111 @@ const EditProfile: React.FC = () => {
 								</div>
 							</div>
 						</div>
+
+						{/* Pricing Configuration - Only for Masters */}
+						{formData.isMaster && (
+							<div className='space-y-4'>
+								<div className='flex items-center gap-2 mb-2'>
+									<DollarSign className='h-5 w-5 text-primary' />
+									<h3 className='text-xl font-semibold'>
+										Session Pricing
+									</h3>
+								</div>
+								<p className='text-sm text-muted-foreground mb-4'>
+									Set your rates for different session
+									durations. Prices are in your local
+									currency.
+								</p>
+								<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
+									{[
+										{
+											key: 'price5min',
+											label: '5 minutes',
+											duration: 5,
+										},
+										{
+											key: 'price10min',
+											label: '10 minutes',
+											duration: 10,
+										},
+										{
+											key: 'price15min',
+											label: '15 minutes',
+											duration: 15,
+										},
+										{
+											key: 'price30min',
+											label: '30 minutes',
+											duration: 30,
+										},
+										{
+											key: 'price45min',
+											label: '45 minutes',
+											duration: 45,
+										},
+										{
+											key: 'price60min',
+											label: '1 hour',
+											duration: 60,
+										},
+									].map(({ key, label, duration }) => (
+										<Card
+											key={key}
+											className='border-2 hover:border-primary transition-colors'>
+											<CardContent className='pt-4'>
+												<div className='flex items-center gap-2 mb-3'>
+													<Clock className='h-4 w-4 text-muted-foreground' />
+													<Label
+														htmlFor={key}
+														className='text-sm font-medium'>
+														{label}
+													</Label>
+												</div>
+												<div className='relative'>
+													<span className='absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground'>
+														$
+													</span>
+													<Input
+														id={key}
+														type='number'
+														name={key}
+														value={
+															formData[key] || ''
+														}
+														onChange={(e) => {
+															const value =
+																e.target
+																	.value ===
+																''
+																	? null
+																	: parseFloat(
+																			e
+																				.target
+																				.value
+																	  );
+															setFormData({
+																...formData,
+																[key]: value,
+															});
+														}}
+														placeholder='0.00'
+														min='0'
+														step='0.01'
+														className='pl-7'
+													/>
+												</div>
+												{formData[key] && (
+													<p className='text-xs text-muted-foreground mt-2'>
+														${formData[key]} per{' '}
+														{duration} min
+													</p>
+												)}
+											</CardContent>
+										</Card>
+									))}
+								</div>
+							</div>
+						)}
 
 						{/* Account Type */}
 						<div className='space-y-4'>

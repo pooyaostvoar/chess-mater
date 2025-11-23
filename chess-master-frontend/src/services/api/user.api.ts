@@ -10,6 +10,14 @@ export interface UpdateUserData {
   profilePicture?: string | null;
   chesscomUrl?: string | null;
   lichessUrl?: string | null;
+  pricing?: {
+    price5min?: number | null;
+    price10min?: number | null;
+    price15min?: number | null;
+    price30min?: number | null;
+    price45min?: number | null;
+    price60min?: number | null;
+  };
 }
 
 export interface User {
@@ -23,6 +31,14 @@ export interface User {
   profilePicture?: string | null;
   chesscomUrl?: string | null;
   lichessUrl?: string | null;
+  pricing?: {
+    price5min?: number | null;
+    price10min?: number | null;
+    price15min?: number | null;
+    price30min?: number | null;
+    price45min?: number | null;
+    price60min?: number | null;
+  } | null;
 }
 
 /**

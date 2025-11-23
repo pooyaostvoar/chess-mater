@@ -26,6 +26,7 @@ router.patch("/:id", isAuthenticated, async (req, res) => {
       profilePicture,
       chesscomUrl,
       lichessUrl,
+      pricing,
     } = req.body;
 
     const updatedUser = await updateUser(userId, {
@@ -38,6 +39,7 @@ router.patch("/:id", isAuthenticated, async (req, res) => {
       profilePicture,
       chesscomUrl,
       lichessUrl,
+      pricing,
     });
 
     res.json({ status: "success", user: updatedUser });

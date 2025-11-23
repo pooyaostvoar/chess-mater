@@ -11,7 +11,7 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Badge } from '../components/ui/badge';
-import { ExternalLink, Search, X } from 'lucide-react';
+import { ExternalLink, Search, X, DollarSign, Clock } from 'lucide-react';
 import { findUsers } from '../services/auth';
 import type { User } from '../services/auth';
 
@@ -293,6 +293,82 @@ const Masters: React.FC = () => {
 											)}
 										</div>
 									)}
+
+									{/* Pricing Display */}
+									{master.pricing &&
+										(master.pricing.price5min ||
+											master.pricing.price10min ||
+											master.pricing.price15min ||
+											master.pricing.price30min ||
+											master.pricing.price45min ||
+											master.pricing.price60min) && (
+											<div className='mt-4 pt-4 border-t'>
+												<div className='flex items-center gap-2 mb-2'>
+													<DollarSign className='h-4 w-4 text-primary' />
+													<span className='text-sm font-semibold'>
+														Session Rates
+													</span>
+												</div>
+												<div className='flex flex-wrap gap-2'>
+													{[
+														{
+															price: master
+																.pricing
+																.price5min,
+															label: '5min',
+														},
+														{
+															price: master
+																.pricing
+																.price10min,
+															label: '10min',
+														},
+														{
+															price: master
+																.pricing
+																.price15min,
+															label: '15min',
+														},
+														{
+															price: master
+																.pricing
+																.price30min,
+															label: '30min',
+														},
+														{
+															price: master
+																.pricing
+																.price45min,
+															label: '45min',
+														},
+														{
+															price: master
+																.pricing
+																.price60min,
+															label: '1hr',
+														},
+													]
+														.filter((p) => p.price)
+														.map(
+															({
+																price,
+																label,
+															}) => (
+																<Badge
+																	key={label}
+																	variant='outline'
+																	className='text-xs font-medium'>
+																	<Clock className='h-3 w-3 mr-1' />
+																	{label}: $
+																	{price?.toFixed(
+																		2
+																	)}
+																</Badge>
+															)
+														)}
+												</div>
+											</div>
+										)}
 								</CardHeader>
 								<CardContent>
 									<Button

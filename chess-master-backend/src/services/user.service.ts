@@ -1,5 +1,6 @@
 import { AppDataSource } from "../database/datasource";
 import { User } from "../database/entity/user";
+import { formatPricing } from "./pricing.service";
 
 export interface UpdateUserData {
   email?: string;
@@ -11,6 +12,14 @@ export interface UpdateUserData {
   profilePicture?: string | null;
   chesscomUrl?: string | null;
   lichessUrl?: string | null;
+  pricing?: {
+    price5min?: number | null;
+    price10min?: number | null;
+    price15min?: number | null;
+    price30min?: number | null;
+    price45min?: number | null;
+    price60min?: number | null;
+  };
 }
 
 export interface UserFilters {
@@ -33,6 +42,14 @@ export interface SafeUser {
   profilePicture: string | null;
   chesscomUrl: string | null;
   lichessUrl: string | null;
+  pricing: {
+    price5min: number | null;
+    price10min: number | null;
+    price15min: number | null;
+    price30min: number | null;
+    price45min: number | null;
+    price60min: number | null;
+  } | null;
 }
 
 /**
@@ -50,6 +67,7 @@ export function formatUser(user: User): SafeUser {
     profilePicture: user.profilePicture,
     chesscomUrl: user.chesscomUrl,
     lichessUrl: user.lichessUrl,
+    pricing: formatPricing(user.pricing),
   };
 }
 
@@ -80,6 +98,7 @@ export async function getAuthenticatedUser(userId: number): Promise<SafeUser | n
   const userRepo = AppDataSource.getRepository(User);
   const user = await userRepo.findOne({
     where: { id: userId },
+    relations: ["pricing"],
     select: [
       "id",
       "username",
@@ -105,13 +124,16 @@ export async function updateUser(
   data: UpdateUserData
 ): Promise<SafeUser> {
   const userRepo = AppDataSource.getRepository(User);
-  const user = await userRepo.findOne({ where: { id: userId } });
+  const user = await userRepo.findOne({ 
+    where: { id: userId },
+    relations: ["pricing"],
+  });
 
   if (!user) {
     throw new Error("User not found");
   }
 
-  // Update fields
+  // Update user fields
   if (data.email !== undefined) user.email = data.email;
   if (data.username !== undefined) user.username = data.username;
   if (data.title !== undefined) user.title = data.title;
@@ -122,8 +144,21 @@ export async function updateUser(
   if (data.chesscomUrl !== undefined) user.chesscomUrl = data.chesscomUrl;
   if (data.lichessUrl !== undefined) user.lichessUrl = data.lichessUrl;
 
+  // Update pricing if provided
+  if (data.pricing !== undefined) {
+    const { updatePricing } = await import("./pricing.service");
+    await updatePricing(userId, data.pricing);
+  }
+
   await userRepo.save(user);
-  return formatUser(user);
+  
+  // Reload with pricing relation
+  const updatedUser = await userRepo.findOne({
+    where: { id: userId },
+    relations: ["pricing"],
+  });
+  
+  return formatUser(updatedUser || user);
 }
 
 /**
@@ -131,7 +166,8 @@ export async function updateUser(
  */
 export async function findUsers(filters: UserFilters): Promise<User[]> {
   const repo = AppDataSource.getRepository(User);
-  let qb = repo.createQueryBuilder("user");
+  let qb = repo.createQueryBuilder("user")
+    .leftJoinAndSelect("user.pricing", "pricing");
 
   if (filters.username) {
     qb = qb.andWhere("user.username ILIKE :username", {

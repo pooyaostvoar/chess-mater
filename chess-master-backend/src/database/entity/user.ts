@@ -1,5 +1,6 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn, OneToOne } from "typeorm";
 import { ScheduleSlot } from "./schedule-slots";
+import { MasterPricing } from "./master-pricing";
 
 @Entity("users")
 export class User {
@@ -32,6 +33,11 @@ export class User {
 
   @Column("text", { nullable: true })
   lichessUrl: string | null;
+
+  @OneToOne(() => MasterPricing, (pricing) => pricing.master, {
+    cascade: true,
+  })
+  pricing: MasterPricing | null;
 
   @Column("bytea")
   password: Buffer;

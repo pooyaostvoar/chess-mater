@@ -2,6 +2,7 @@ import { DataSource } from "typeorm";
 import { User } from "./entity/user";
 import { Game } from "./entity/game";
 import { ScheduleSlot } from "./entity/schedule-slots";
+import { MasterPricing } from "./entity/master-pricing";
 
 export const AppDataSource = new DataSource(
   process.env.NODE_ENV === "test"
@@ -9,7 +10,7 @@ export const AppDataSource = new DataSource(
         name: "default",
         type: "better-sqlite3",
         database: ":memory:",
-        entities: [User, Game, ScheduleSlot],
+        entities: [User, Game, ScheduleSlot, MasterPricing],
         synchronize: true,
         dropSchema: true,
       }
@@ -21,6 +22,6 @@ export const AppDataSource = new DataSource(
         password: "chesspass",
         database: "chess_master",
         synchronize: true,
-        entities: [User, Game, ScheduleSlot],
+        entities: [User, Game, ScheduleSlot, MasterPricing],
       }
 );
