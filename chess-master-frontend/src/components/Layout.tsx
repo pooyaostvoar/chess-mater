@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Link, Outlet, useNavigate } from 'react-router-dom';
 import { logout } from '../services/auth';
 import { useUser } from '../contexts/UserContext';
@@ -10,33 +10,18 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from './ui/dropdown-menu';
-import { LogOut, User, Calendar, BookOpen } from 'lucide-react';
+import { Button } from './ui/button';
+import {
+	LogOut,
+	User,
+	Calendar,
+	BookOpen,
+	LayoutDashboard,
+} from 'lucide-react';
 
 const Layout: React.FC = () => {
 	const navigate = useNavigate();
 	const { user, loading, setUser } = useUser();
-
-	// Redirect to login if not authenticated
-	useEffect(() => {
-		if (!loading && !user) {
-			navigate('/login', { replace: true });
-		}
-	}, [user, loading, navigate]);
-
-	// Show loading state while user is being fetched
-	if (loading) {
-		return (
-			<div className='flex flex-col items-center justify-center min-h-screen'>
-				<div className='w-10 h-10 border-4 border-gray-200 border-t-primary rounded-full animate-spin mb-5' />
-				<p className='text-muted-foreground'>Loading...</p>
-			</div>
-		);
-	}
-
-	// Don't render if user is not authenticated (will redirect)
-	if (!user) {
-		return null;
-	}
 
 	const firstLetter = user?.username
 		? user.username.charAt(0).toUpperCase()
@@ -46,11 +31,11 @@ const Layout: React.FC = () => {
 		try {
 			await logout();
 			setUser(null);
-			navigate('/login');
+			navigate('/home');
 		} catch (err) {
 			console.error('Logout error', err);
 			setUser(null);
-			navigate('/login');
+			navigate('/home');
 		}
 	};
 
@@ -78,58 +63,89 @@ const Layout: React.FC = () => {
 								Browse Masters
 							</Link>
 
-							<DropdownMenu>
-								<DropdownMenuTrigger asChild>
-									<button className='w-11 h-11 rounded-full bg-white text-slate-900 font-bold text-lg flex items-center justify-center hover:ring-2 hover:ring-primary transition-all'>
-										{firstLetter}
-									</button>
-								</DropdownMenuTrigger>
-								<DropdownMenuContent
-									align='end'
-									className='w-56'>
-									<DropdownMenuLabel>
-										<div className='flex flex-col space-y-1'>
-											<p className='text-sm font-medium'>
-												{user?.username}
-											</p>
-											<p className='text-xs text-muted-foreground'>
-												{user?.isMaster
-													? 'Master'
-													: 'Player'}
-											</p>
-										</div>
-									</DropdownMenuLabel>
-									<DropdownMenuSeparator />
-									<DropdownMenuItem
-										onClick={() =>
-											navigate('/edit-profile')
-										}>
-										<User className='mr-2 h-4 w-4' />
-										<span>Edit Profile</span>
-									</DropdownMenuItem>
-									{user?.isMaster && (
+							{loading ? (
+								<div className='w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin' />
+							) : user ? (
+								<DropdownMenu>
+									<DropdownMenuTrigger asChild>
+										<button className='w-11 h-11 rounded-full bg-white text-slate-900 font-bold text-lg flex items-center justify-center hover:ring-2 hover:ring-primary transition-all'>
+											{firstLetter}
+										</button>
+									</DropdownMenuTrigger>
+									<DropdownMenuContent
+										align='end'
+										className='w-56'>
+										<DropdownMenuLabel>
+											<div className='flex flex-col space-y-1'>
+												<p className='text-sm font-medium'>
+													{user?.username}
+												</p>
+												<p className='text-xs text-muted-foreground'>
+													{user?.isMaster
+														? 'Master'
+														: 'Player'}
+												</p>
+											</div>
+										</DropdownMenuLabel>
+										<DropdownMenuSeparator />
 										<DropdownMenuItem
 											onClick={() =>
-												navigate(`/calendar/${user.id}`)
+												navigate('/dashboard')
 											}>
-											<Calendar className='mr-2 h-4 w-4' />
-											<span>My Schedule</span>
+											<LayoutDashboard className='mr-2 h-4 w-4' />
+											<span>Dashboard</span>
 										</DropdownMenuItem>
-									)}
-									<DropdownMenuItem
-										onClick={() => navigate('/bookings')}>
-										<BookOpen className='mr-2 h-4 w-4' />
-										<span>My Bookings</span>
-									</DropdownMenuItem>
-									<DropdownMenuSeparator />
-									<DropdownMenuItem
-										onClick={handleLogout}
-										className='text-destructive'>
-										<LogOut className='mr-2 h-4 w-4' />
-										<span>Logout</span>
-									</DropdownMenuItem>
-								</DropdownMenuContent>
-							</DropdownMenu>
+										<DropdownMenuItem
+											onClick={() =>
+												navigate('/edit-profile')
+											}>
+											<User className='mr-2 h-4 w-4' />
+											<span>Edit Profile</span>
+										</DropdownMenuItem>
+										{user?.isMaster && (
+											<DropdownMenuItem
+												onClick={() =>
+													navigate(
+														`/calendar/${user.id}`
+													)
+												}>
+												<Calendar className='mr-2 h-4 w-4' />
+												<span>My Schedule</span>
+											</DropdownMenuItem>
+										)}
+										<DropdownMenuItem
+											onClick={() =>
+												navigate('/bookings')
+											}>
+											<BookOpen className='mr-2 h-4 w-4' />
+											<span>My Bookings</span>
+										</DropdownMenuItem>
+										<DropdownMenuSeparator />
+										<DropdownMenuItem
+											onClick={handleLogout}
+											className='text-destructive'>
+											<LogOut className='mr-2 h-4 w-4' />
+											<span>Logout</span>
+										</DropdownMenuItem>
+									</DropdownMenuContent>
+								</DropdownMenu>
+							) : (
+								<div className='flex items-center gap-4'>
+									<Button
+										variant='ghost'
+										size='sm'
+										onClick={() => navigate('/login')}
+										className='text-white hover:bg-white/10'>
+										Log In
+									</Button>
+									<Button
+										size='sm'
+										onClick={() => navigate('/signup')}
+										className='bg-white text-slate-900 hover:bg-white/90'>
+										Sign Up
+									</Button>
+								</div>
+							)}
 						</div>
 					</div>
 				</div>

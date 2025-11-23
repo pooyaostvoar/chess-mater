@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Signup from './pages/Signup';
 import Home from './pages/Home';
 import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
 import EditProfile from './pages/EditProfile';
 import Masters from './pages/Masters';
 import MasterScheduleCalendar from './pages/MasterCalender';
@@ -19,6 +20,10 @@ const App: React.FC = () => {
 					<Route
 						path='/home'
 						element={<Home />}
+					/>
+					<Route
+						path='/dashboard'
+						element={<Dashboard />}
 					/>
 					<Route
 						path='/edit-profile'
