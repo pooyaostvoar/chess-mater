@@ -22,3 +22,12 @@ export const deleteSlots = async (ids: number[]) => {
     withCredentials: true,
   });
 };
+
+export const bookSlot = async (slotId: number) => {
+  const res = await axios.post(
+    `${API_URL}/schedule/slot/${slotId}/reserve`,
+    {},
+    { withCredentials: true }
+  );
+  return res;
+};

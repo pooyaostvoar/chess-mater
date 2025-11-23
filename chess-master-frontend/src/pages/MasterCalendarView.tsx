@@ -1,0 +1,122 @@
+import React, { useState } from 'react';
+import { useParams } from 'react-router-dom';
+import axios from 'axios';
+import { createSlot } from '../services/schedule';
+import { API_URL } from '../services/config';
+import { useScheduleSlots } from '../hooks/useScheduleSlots';
+import { mapSlotToEvent } from '../utils/slotUtils';
+import ScheduleCalendar from '../components/ScheduleCalendar';
+import SlotModal from '../components/SlotModal';
+
+const MasterCalendarView: React.FC = () => {
+	const { userId } = useParams<{ userId: string }>();
+	const { events, setEvents, refreshSlots } = useScheduleSlots(userId);
+	const [modalVisible, setModalVisible] = useState(false);
+	const [selectedSlotId, setSelectedSlotId] = useState<number | null>(null);
+
+	// Create new slot
+	const handleSelect = async (info: any) => {
+		const start = info.startStr;
+		const end = info.endStr;
+
+		try {
+			const res = await createSlot({ startTime: start, endTime: end });
+			const newSlot = res.data.slot;
+			setEvents((prev) => [...prev, mapSlotToEvent(newSlot)]);
+		} catch (err) {
+			console.error('Failed to create slot', err);
+		}
+	};
+
+	// Open modal to manage slot
+	const handleEventClick = (info: any) => {
+		setSelectedSlotId(Number(info.event.id));
+		setModalVisible(true);
+	};
+
+	// Drag & drop update
+	const handleEventDrop = async (info: any) => {
+		const id = info.event.id;
+
+		try {
+			await axios.patch(
+				`${API_URL}/schedule/${id}`,
+				{
+					startTime: info.event.start,
+					endTime: info.event.end,
+				},
+				{ withCredentials: true }
+			);
+		} catch (err) {
+			console.error('Failed to update slot', err);
+		}
+	};
+
+	// Resize update
+	const handleEventResize = async (info: any) => {
+		const id = info.event.id;
+
+		try {
+			await axios.patch(
+				`${API_URL}/schedule/${id}`,
+				{
+					startTime: info.event.start,
+					endTime: info.event.end,
+				},
+				{ withCredentials: true }
+			);
+		} catch (err) {
+			console.error('Failed to resize slot', err);
+		}
+	};
+
+	// Handle delete from modal
+	const handleDeleted = (deletedId: number) => {
+		setEvents((prev) => prev.filter((e) => e.id !== deletedId));
+	};
+
+	const handleStatusChange = (updatedSlot: any) => {
+		setEvents((prev) =>
+			prev.map((e) =>
+				e.id === updatedSlot.id ? mapSlotToEvent(updatedSlot) : e
+			)
+		);
+	};
+
+	return (
+		<div style={styles.container}>
+			<ScheduleCalendar
+				events={events}
+				selectable={true}
+				editable={true}
+				onSelect={handleSelect}
+				onEventClick={handleEventClick}
+				onEventDrop={handleEventDrop}
+				onEventResize={handleEventResize}
+				height='90vh'
+			/>
+
+			<SlotModal
+				visible={modalVisible}
+				slotId={selectedSlotId}
+				onClose={() => setModalVisible(false)}
+				onDeleted={handleDeleted}
+				onStatusChange={handleStatusChange}
+			/>
+		</div>
+	);
+};
+
+const styles: Record<string, React.CSSProperties> = {
+	container: {
+		maxWidth: '1200px',
+		margin: '20px auto',
+		background: '#fff',
+		padding: 20,
+		borderRadius: 10,
+		boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
+	},
+};
+
+export default MasterCalendarView;
+
