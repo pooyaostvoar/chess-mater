@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from '../ui/card';
+import { Card, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Crown, BookOpen, TrendingUp } from 'lucide-react';
 
 export const FeaturesSection: React.FC = () => {
@@ -16,8 +10,7 @@ export const FeaturesSection: React.FC = () => {
 					Why Choose Chess Master?
 				</h2>
 				<p className='text-lg text-muted-foreground max-w-2xl mx-auto'>
-					Experience personalized chess coaching from verified
-					masters
+					Experience personalized chess coaching from verified masters
 				</p>
 			</div>
 
@@ -58,4 +51,3 @@ export const FeaturesSection: React.FC = () => {
 		</div>
 	);
 };
-
