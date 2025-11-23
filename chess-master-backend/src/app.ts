@@ -35,6 +35,9 @@ const corsOptions = {
     "http://localhost:3000",
     "http://localhost:3003",
     "http://localhost:3004",
+    "http://185.141.61.15:3000",
+    "http://185.141.61.15:3003",
+    "http://185.141.61.15:3004",
   ],
   optionsSuccessStatus: 200, // For legacy browser support
   credentials: true,

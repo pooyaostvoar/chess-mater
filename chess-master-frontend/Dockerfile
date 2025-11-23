@@ -17,6 +17,7 @@ RUN pnpm install
 # Copy the rest of the source code
 COPY . .
 
+ENV REACT_APP_API_URL=http://185.141.61.15:3004
 # Build React app
 RUN pnpm build  # outputs 'build' folder
 
