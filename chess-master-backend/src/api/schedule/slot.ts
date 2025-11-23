@@ -52,6 +52,7 @@ slotRouter.get("/user/:userId", async (req, res) => {
           id: slot.reservedBy.id,
           username: slot.reservedBy.username,
           email: slot.reservedBy.email,
+          profilePicture: slot.reservedBy.profilePicture,
         };
       }
       return formatted;
@@ -134,6 +135,7 @@ slotRouter.post("/:id/reserve", isAuthenticated, async (req, res) => {
       id: updatedSlot.reservedBy.id,
       username: updatedSlot.reservedBy.username,
       email: updatedSlot.reservedBy.email,
+      profilePicture: updatedSlot.reservedBy.profilePicture,
     };
   }
 
@@ -180,6 +182,7 @@ slotRouter.patch("/:id/status", isAuthenticated, async (req, res) => {
       id: updatedSlot.reservedBy.id,
       username: updatedSlot.reservedBy.username,
       email: updatedSlot.reservedBy.email,
+      profilePicture: updatedSlot.reservedBy.profilePicture,
     };
   }
 
@@ -210,6 +213,9 @@ slotRouter.get("/my-bookings", isAuthenticated, async (req, res) => {
           email: slot.master.email,
           title: slot.master.title,
           rating: slot.master.rating,
+          profilePicture: slot.master.profilePicture,
+          chesscomUrl: slot.master.chesscomUrl,
+          lichessUrl: slot.master.lichessUrl,
         };
       }
       return formatted;
@@ -245,6 +251,7 @@ slotRouter.get("/master-bookings", isAuthenticated, async (req, res) => {
           id: slot.reservedBy.id,
           username: slot.reservedBy.username,
           email: slot.reservedBy.email,
+          profilePicture: slot.reservedBy.profilePicture,
         };
       }
       return formatted;
