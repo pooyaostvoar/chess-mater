@@ -38,31 +38,28 @@ const Home: React.FC = () => {
 		const loadData = async () => {
 			try {
 				const response = await findUsers({ isMaster: true });
-				const allMasters = response.users.filter((m) => m.rating);
+				// Get all masters with ratings for top 5
+				const mastersWithRating = response.users.filter(
+					(m) => m.rating
+				);
 
 				// Sort by rating (highest first) and take top 5
-				const sorted = allMasters
+				const sorted = mastersWithRating
 					.sort((a, b) => (b.rating || 0) - (a.rating || 0))
 					.slice(0, 5);
 
 				setTopMasters(sorted);
 
-				// For logged-in users, get recommended masters (different from top rated)
+				// For logged-in users, get recommended masters
 				if (user) {
-					// Shuffle and take 6 different masters, or all if less than 6
-					const shuffled = [...allMasters]
-						.filter((m) => !sorted.some((top) => top.id === m.id))
-						.sort(() => Math.random() - 0.5)
-						.slice(0, 6);
-					setRecommendedMasters(shuffled);
-
-					// Load recent bookings
+					// Load recent bookings first to get booking data
 					setBookingsLoading(true);
+					let bookings: Booking[] = [];
 					try {
 						const bookingsRes = user.isMaster
 							? await getMasterBookings()
 							: await getMyBookings();
-						const bookings = bookingsRes.bookings || [];
+						bookings = bookingsRes.bookings || [];
 						// Get upcoming bookings (next 3)
 						const upcoming = bookings
 							.filter((b) => new Date(b.startTime) > new Date())
@@ -78,6 +75,47 @@ const Home: React.FC = () => {
 					} finally {
 						setBookingsLoading(false);
 					}
+
+					// Get all masters (including those without ratings)
+					const allMasters = response.users;
+
+					// For regular users: get IDs of masters they have bookings with
+					// For masters: we just show other masters (they don't book with other masters)
+					const bookingMasterIds = new Set<number>();
+					if (!user.isMaster) {
+						// Regular user's bookings: get IDs of masters they booked with
+						bookings.forEach((b) => {
+							if (b.master?.id) {
+								bookingMasterIds.add(b.master.id);
+							}
+						});
+					}
+
+					// Filter recommended masters:
+					// 1. Exclude current user
+					// 2. Exclude top 5 (already shown)
+					// 3. For regular users: prioritize masters they have bookings with
+					// 4. For masters: show all other masters
+					const recommended = allMasters
+						.filter((m) => m.id !== user.id) // Exclude current user
+						.filter((m) => !sorted.some((top) => top.id === m.id)) // Exclude top 5
+						.sort((a, b) => {
+							if (!user.isMaster) {
+								// For regular users: prioritize masters with bookings
+								const aHasBooking = bookingMasterIds.has(a.id);
+								const bHasBooking = bookingMasterIds.has(b.id);
+								if (aHasBooking && !bHasBooking) return -1;
+								if (!aHasBooking && bHasBooking) return 1;
+							}
+							// Then sort by rating (higher first), or by ID if no rating
+							const aRating = a.rating || 0;
+							const bRating = b.rating || 0;
+							if (aRating !== bRating) return bRating - aRating;
+							return a.id - b.id; // Stable sort
+						})
+						.slice(0, 6);
+
+					setRecommendedMasters(recommended);
 				}
 			} catch (err) {
 				console.error('Failed to load masters', err);
@@ -115,42 +153,51 @@ const Home: React.FC = () => {
 					</div>
 
 					{/* Recent Bookings Section */}
-					{!user.isMaster && (
-						<div className='mb-12'>
-							<div className='flex justify-between items-center mb-6'>
-								<h2 className='text-2xl md:text-3xl font-bold'>
-									Upcoming Sessions
-								</h2>
-								<Button
-									variant='outline'
-									onClick={() => navigate('/bookings')}>
-									View All
-									<ArrowRight className='ml-2 h-4 w-4' />
-								</Button>
-							</div>
+					<div className='mb-12'>
+						<div className='flex justify-between items-center mb-6'>
+							<h2 className='text-2xl md:text-3xl font-bold'>
+								Upcoming Sessions
+							</h2>
+							<Button
+								variant='outline'
+								onClick={() => navigate('/bookings')}>
+								View All
+								<ArrowRight className='ml-2 h-4 w-4' />
+							</Button>
+						</div>
 
-							{bookingsLoading ? (
-								<div className='flex justify-center py-8'>
-									<div className='w-8 h-8 border-4 border-gray-200 border-t-primary rounded-full animate-spin' />
-								</div>
-							) : recentBookings.length === 0 ? (
-								<Card>
-									<CardContent className='pt-6 text-center'>
-										<Calendar className='h-12 w-12 text-muted-foreground mx-auto mb-4' />
-										<p className='text-muted-foreground mb-4'>
-											No upcoming sessions scheduled
-										</p>
-										<Button
-											onClick={() =>
-												navigate('/masters')
-											}>
-											Browse Masters
-										</Button>
-									</CardContent>
-								</Card>
-							) : (
-								<div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-									{recentBookings.map((booking) => (
+						{bookingsLoading ? (
+							<div className='flex justify-center py-8'>
+								<div className='w-8 h-8 border-4 border-gray-200 border-t-primary rounded-full animate-spin' />
+							</div>
+						) : recentBookings.length === 0 ? (
+							<Card>
+								<CardContent className='pt-6 text-center'>
+									<Calendar className='h-12 w-12 text-muted-foreground mx-auto mb-4' />
+									<p className='text-muted-foreground mb-4'>
+										No upcoming sessions scheduled
+									</p>
+									<Button
+										onClick={() => navigate('/masters')}>
+										Browse Masters
+									</Button>
+								</CardContent>
+							</Card>
+						) : (
+							<div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+								{recentBookings.map((booking) => {
+									// For masters, show the player who reserved the slot
+									// For regular users, show the master
+									const displayUser = user.isMaster
+										? booking.reservedBy
+										: booking.master;
+									const displayName = user.isMaster
+										? booking.reservedBy?.username ||
+										  'Unknown Player'
+										: booking.master?.username ||
+										  'Unknown Master';
+
+									return (
 										<Card
 											key={booking.id}
 											className='cursor-pointer hover:shadow-lg transition-shadow'
@@ -178,42 +225,38 @@ const Home: React.FC = () => {
 											</CardHeader>
 											<CardContent>
 												<div className='flex items-center gap-2'>
-													{booking.master
-														?.profilePicture ? (
+													{displayUser?.profilePicture ? (
 														<img
 															src={
-																booking.master
-																	.profilePicture
+																displayUser.profilePicture
 															}
-															alt={
-																booking.master
-																	.username
-															}
+															alt={displayName}
 															className='w-8 h-8 rounded-full object-cover'
 														/>
 													) : (
 														<div className='w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-sm font-bold'>
-															{booking.master?.username
+															{displayName
 																?.charAt(0)
 																.toUpperCase() ||
 																'?'}
 														</div>
 													)}
 													<span className='font-medium'>
-														{booking.master
-															?.username ||
-															'Unknown Master'}
+														{displayName}
 													</span>
-													{booking.master?.title && (
-														<Badge
-															variant='default'
-															className='ml-auto'>
-															{
-																booking.master
-																	.title
-															}
-														</Badge>
-													)}
+													{!user.isMaster &&
+														booking.master
+															?.title && (
+															<Badge
+																variant='default'
+																className='ml-auto'>
+																{
+																	booking
+																		.master
+																		.title
+																}
+															</Badge>
+														)}
 												</div>
 												<div className='mt-3'>
 													<Badge
@@ -237,11 +280,11 @@ const Home: React.FC = () => {
 												</div>
 											</CardContent>
 										</Card>
-									))}
-								</div>
-							)}
-						</div>
-					)}
+									);
+								})}
+							</div>
+						)}
+					</div>
 
 					{/* Recommended Masters Section */}
 					<div className='mb-12'>
