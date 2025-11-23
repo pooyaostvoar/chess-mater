@@ -10,10 +10,12 @@ import {
 	CardTitle,
 } from '../components/ui/card';
 import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
-import { Label } from '../components/ui/label';
-import { Textarea } from '../components/ui/textarea';
-import { Upload, X, DollarSign, Clock } from 'lucide-react';
+import { ProfilePictureSection } from '../components/profile/ProfilePictureSection';
+import { BasicInfoSection } from '../components/profile/BasicInfoSection';
+import { ChessProfileSection } from '../components/profile/ChessProfileSection';
+import { ChessPlatformSection } from '../components/profile/ChessPlatformSection';
+import { PricingSection } from '../components/profile/PricingSection';
+import { AccountTypeSection } from '../components/profile/AccountTypeSection';
 
 const EditProfile: React.FC = () => {
 	const [formData, setFormData] = useState<any>(null);
@@ -32,7 +34,6 @@ const EditProfile: React.FC = () => {
 			if (!response.user) {
 				navigate('/login');
 			} else {
-				// Flatten pricing into formData for easier form handling
 				const userData = {
 					...response.user,
 					price5min: response.user.pricing?.price5min || null,
@@ -72,14 +73,12 @@ const EditProfile: React.FC = () => {
 	const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0];
 		if (file) {
-			// Validate file type
 			if (!file.type.startsWith('image/')) {
 				setMessage('Please select an image file');
 				setMessageType('error');
 				return;
 			}
 
-			// Validate file size (max 2MB)
 			if (file.size > 2 * 1024 * 1024) {
 				setMessage('Image size should be less than 2MB');
 				setMessageType('error');
@@ -101,7 +100,6 @@ const EditProfile: React.FC = () => {
 					setFormData({ ...formData, profilePicture: base64String });
 					setMessage('Image loaded successfully');
 					setMessageType('success');
-					// Clear success message after 2 seconds
 					setTimeout(() => setMessage(''), 2000);
 				} catch (err) {
 					console.error('Error processing image:', err);
@@ -118,22 +116,16 @@ const EditProfile: React.FC = () => {
 		setFormData({ ...formData, profilePicture: null });
 	};
 
+	const handlePricingChange = (key: string, value: number | null) => {
+		setFormData({ ...formData, [key]: value });
+	};
+
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		setLoading(true);
 		setMessage('');
 
 		try {
-			// Log the data being sent (without the full base64 string for debugging)
-			console.log('Updating profile with:', {
-				...formData,
-				profilePicture: formData.profilePicture
-					? `${formData.profilePicture.substring(0, 50)}... (${
-							formData.profilePicture.length
-					  } chars)`
-					: null,
-			});
-
 			const data = await updateUser(formData.id, {
 				email: formData.email,
 				username: formData.username,
@@ -158,7 +150,6 @@ const EditProfile: React.FC = () => {
 				setMessage('Profile updated successfully!');
 				setMessageType('success');
 				setUser(data.user);
-				// Update preview image if profile picture was changed
 				if (data.user.profilePicture) {
 					setPreviewImage(data.user.profilePicture);
 				} else {
@@ -194,325 +185,52 @@ const EditProfile: React.FC = () => {
 					<form
 						onSubmit={handleSubmit}
 						className='space-y-8'>
-						{/* Profile Picture Section */}
-						<div className='space-y-4'>
-							<h3 className='text-xl font-semibold'>
-								Profile Picture
-							</h3>
-							<div className='flex items-start gap-6'>
-								<div className='flex-shrink-0'>
-									{previewImage ? (
-										<div className='relative'>
-											<img
-												src={previewImage}
-												alt='Profile preview'
-												className='w-32 h-32 rounded-full object-cover border-4 border-primary'
-											/>
-											<button
-												type='button'
-												onClick={removeImage}
-												className='absolute -top-2 -right-2 w-6 h-6 rounded-full bg-destructive text-white flex items-center justify-center hover:bg-destructive/90'>
-												<X className='h-4 w-4' />
-											</button>
-										</div>
-									) : (
-										<div className='w-32 h-32 rounded-full bg-muted flex items-center justify-center border-4 border-primary'>
-											<span className='text-4xl font-bold text-muted-foreground'>
-												{formData.username
-													?.charAt(0)
-													.toUpperCase() || '?'}
-											</span>
-										</div>
-									)}
-								</div>
-								<div className='flex-1'>
-									<Label
-										htmlFor='profilePicture'
-										className='mb-2 block'>
-										Upload Profile Picture
-									</Label>
-									<div className='flex items-center gap-4'>
-										<Label
-											htmlFor='profilePicture'
-											className='cursor-pointer inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors'>
-											<Upload className='h-4 w-4' />
-											Choose Image
-										</Label>
-										<Input
-											id='profilePicture'
-											type='file'
-											accept='image/*'
-											onChange={handleImageChange}
-											className='hidden'
-										/>
-										<p className='text-sm text-muted-foreground'>
-											JPG, PNG or GIF. Max size 2MB
-										</p>
-									</div>
-								</div>
-							</div>
-						</div>
+						<ProfilePictureSection
+							previewImage={previewImage}
+							username={formData.username}
+							onImageChange={handleImageChange}
+							onRemoveImage={removeImage}
+						/>
 
-						{/* Basic Information */}
-						<div className='space-y-4'>
-							<h3 className='text-xl font-semibold'>
-								Basic Information
-							</h3>
-							<div className='space-y-4'>
-								<div>
-									<Label htmlFor='username'>Username</Label>
-									<Input
-										id='username'
-										type='text'
-										name='username'
-										value={formData.username || ''}
-										onChange={handleChange}
-										placeholder='Your username'
-									/>
-								</div>
+						<BasicInfoSection
+							username={formData.username}
+							email={formData.email}
+							onChange={handleChange}
+						/>
 
-								<div>
-									<Label htmlFor='email'>Email</Label>
-									<Input
-										id='email'
-										type='email'
-										name='email'
-										value={formData.email || ''}
-										onChange={handleChange}
-										placeholder='your.email@example.com'
-									/>
-								</div>
-							</div>
-						</div>
+						<ChessProfileSection
+							title={formData.title}
+							rating={formData.rating}
+							bio={formData.bio}
+							onChange={handleChange}
+						/>
 
-						{/* Chess Profile */}
-						<div className='space-y-4'>
-							<h3 className='text-xl font-semibold'>
-								Chess Profile
-							</h3>
-							<div className='space-y-4'>
-								<div>
-									<Label htmlFor='title'>
-										Chess Title (optional)
-									</Label>
-									<select
-										id='title'
-										name='title'
-										value={formData.title || ''}
-										onChange={handleChange}
-										className='flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50'>
-										<option value=''>No title</option>
-										<option value='CM'>
-											CM - Candidate Master
-										</option>
-										<option value='FM'>
-											FM - FIDE Master
-										</option>
-										<option value='IM'>
-											IM - International Master
-										</option>
-										<option value='GM'>
-											GM - Grandmaster
-										</option>
-									</select>
-								</div>
+						<ChessPlatformSection
+							chesscomUrl={formData.chesscomUrl}
+							lichessUrl={formData.lichessUrl}
+							onChange={handleChange}
+						/>
 
-								<div>
-									<Label htmlFor='rating'>
-										Rating (optional)
-									</Label>
-									<Input
-										id='rating'
-										type='number'
-										name='rating'
-										value={formData.rating || ''}
-										onChange={handleChange}
-										placeholder='e.g., 2000'
-									/>
-								</div>
-
-								<div>
-									<Label htmlFor='bio'>Bio (optional)</Label>
-									<Textarea
-										id='bio'
-										name='bio'
-										value={formData.bio || ''}
-										onChange={handleChange}
-										placeholder='Tell us about your chess journey...'
-										rows={4}
-									/>
-								</div>
-							</div>
-						</div>
-
-						{/* Chess Platform URLs */}
-						<div className='space-y-4'>
-							<h3 className='text-xl font-semibold'>
-								Chess Platform Profiles
-							</h3>
-							<div className='space-y-4'>
-								<div>
-									<Label htmlFor='chesscomUrl'>
-										Chess.com Username/URL (optional)
-									</Label>
-									<Input
-										id='chesscomUrl'
-										type='text'
-										name='chesscomUrl'
-										value={formData.chesscomUrl || ''}
-										onChange={handleChange}
-										placeholder='e.g., username or https://www.chess.com/member/username'
-									/>
-								</div>
-
-								<div>
-									<Label htmlFor='lichessUrl'>
-										Lichess Username/URL (optional)
-									</Label>
-									<Input
-										id='lichessUrl'
-										type='text'
-										name='lichessUrl'
-										value={formData.lichessUrl || ''}
-										onChange={handleChange}
-										placeholder='e.g., username or https://lichess.org/@/username'
-									/>
-								</div>
-							</div>
-						</div>
-
-						{/* Pricing Configuration - Only for Masters */}
 						{formData.isMaster && (
-							<div className='space-y-4'>
-								<div className='flex items-center gap-2 mb-2'>
-									<DollarSign className='h-5 w-5 text-primary' />
-									<h3 className='text-xl font-semibold'>
-										Session Pricing
-									</h3>
-								</div>
-								<p className='text-sm text-muted-foreground mb-4'>
-									Set your rates for different session
-									durations. Prices are in your local
-									currency.
-								</p>
-								<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
-									{[
-										{
-											key: 'price5min',
-											label: '5 minutes',
-											duration: 5,
-										},
-										{
-											key: 'price10min',
-											label: '10 minutes',
-											duration: 10,
-										},
-										{
-											key: 'price15min',
-											label: '15 minutes',
-											duration: 15,
-										},
-										{
-											key: 'price30min',
-											label: '30 minutes',
-											duration: 30,
-										},
-										{
-											key: 'price45min',
-											label: '45 minutes',
-											duration: 45,
-										},
-										{
-											key: 'price60min',
-											label: '1 hour',
-											duration: 60,
-										},
-									].map(({ key, label, duration }) => (
-										<Card
-											key={key}
-											className='border-2 hover:border-primary transition-colors'>
-											<CardContent className='pt-4'>
-												<div className='flex items-center gap-2 mb-3'>
-													<Clock className='h-4 w-4 text-muted-foreground' />
-													<Label
-														htmlFor={key}
-														className='text-sm font-medium'>
-														{label}
-													</Label>
-												</div>
-												<div className='relative'>
-													<span className='absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground'>
-														$
-													</span>
-													<Input
-														id={key}
-														type='number'
-														name={key}
-														value={
-															formData[key] || ''
-														}
-														onChange={(e) => {
-															const value =
-																e.target
-																	.value ===
-																''
-																	? null
-																	: parseFloat(
-																			e
-																				.target
-																				.value
-																	  );
-															setFormData({
-																...formData,
-																[key]: value,
-															});
-														}}
-														placeholder='0.00'
-														min='0'
-														step='0.01'
-														className='pl-7'
-													/>
-												</div>
-												{formData[key] && (
-													<p className='text-xs text-muted-foreground mt-2'>
-														${formData[key]} per{' '}
-														{duration} min
-													</p>
-												)}
-											</CardContent>
-										</Card>
-									))}
-								</div>
-							</div>
+							<PricingSection
+								pricing={{
+									price5min: formData.price5min,
+									price10min: formData.price10min,
+									price15min: formData.price15min,
+									price30min: formData.price30min,
+									price45min: formData.price45min,
+									price60min: formData.price60min,
+								}}
+								onPricingChange={handlePricingChange}
+							/>
 						)}
 
-						{/* Account Type */}
-						<div className='space-y-4'>
-							<h3 className='text-xl font-semibold'>
-								Account Type
-							</h3>
-							<div className='flex items-center space-x-2 p-4 bg-muted rounded-lg'>
-								<input
-									type='checkbox'
-									id='isMaster'
-									name='isMaster'
-									checked={!!formData.isMaster}
-									onChange={(e) =>
-										setFormData((prev: any) => ({
-											...prev,
-											isMaster: e.target.checked,
-										}))
-									}
-									className='h-4 w-4 rounded border-gray-300'
-								/>
-								<Label
-									htmlFor='isMaster'
-									className='cursor-pointer'>
-									I am a chess master and want to offer
-									coaching sessions
-								</Label>
-							</div>
-						</div>
+						<AccountTypeSection
+							isMaster={formData.isMaster}
+							onChange={(isMaster) =>
+								setFormData({ ...formData, isMaster })
+							}
+						/>
 
 						<Button
 							type='submit'
