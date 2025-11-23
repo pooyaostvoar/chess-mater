@@ -141,7 +141,7 @@ slotRouter.post("/:id/reserve", isAuthenticated, async (req, res) => {
 });
 
 // PATCH /schedule/slot/:id/status
-slotRouter.patch("/:id/status", async (req, res) => {
+slotRouter.patch("/:id/status", isAuthenticated, async (req, res) => {
   const slotId = Number(req.params.id);
   const masterId = (req.user as any).id; // master
   const { status } = req.body;
@@ -184,4 +184,75 @@ slotRouter.patch("/:id/status", async (req, res) => {
   }
 
   res.json({ message: "Slot status updated", slot: updatedSlot });
+});
+
+// GET /schedule/slot/my-bookings - Get bookings for regular users (slots they reserved)
+slotRouter.get("/my-bookings", isAuthenticated, async (req, res) => {
+  try {
+    const userId = (req.user as any)?.id;
+
+    const repo = AppDataSource.getRepository(ScheduleSlot);
+
+    const slots = await repo
+      .createQueryBuilder("slot")
+      .leftJoinAndSelect("slot.master", "master")
+      .where("slot.reservedBy = :userId", { userId })
+      .orderBy("slot.startTime", "ASC")
+      .getMany();
+
+    // Format to exclude sensitive user data
+    const formattedSlots = slots.map((slot) => {
+      const formatted: any = { ...slot };
+      if (slot.master) {
+        formatted.master = {
+          id: slot.master.id,
+          username: slot.master.username,
+          email: slot.master.email,
+          title: slot.master.title,
+          rating: slot.master.rating,
+        };
+      }
+      return formatted;
+    });
+
+    res.json({ success: true, bookings: formattedSlots });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// GET /schedule/slot/master-bookings - Get bookings for masters (slots reserved by others)
+slotRouter.get("/master-bookings", isAuthenticated, async (req, res) => {
+  try {
+    const masterId = (req.user as any)?.id;
+
+    const repo = AppDataSource.getRepository(ScheduleSlot);
+
+    const slots = await repo
+      .createQueryBuilder("slot")
+      .leftJoinAndSelect("slot.reservedBy", "reservedBy")
+      .where("slot.master = :masterId", { masterId })
+      .andWhere("slot.reservedBy IS NOT NULL")
+      .orderBy("slot.startTime", "ASC")
+      .getMany();
+
+    // Format to exclude sensitive user data
+    const formattedSlots = slots.map((slot) => {
+      const formatted: any = { ...slot };
+      if (slot.reservedBy) {
+        formatted.reservedBy = {
+          id: slot.reservedBy.id,
+          username: slot.reservedBy.username,
+          email: slot.reservedBy.email,
+        };
+      }
+      return formatted;
+    });
+
+    res.json({ success: true, bookings: formattedSlots });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Internal server error" });
+  }
 });

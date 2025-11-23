@@ -66,6 +66,16 @@ const Home: React.FC = () => {
 							</p>
 						</div>
 
+						<div
+							style={styles.card}
+							onClick={() => navigate('/bookings')}>
+							<div style={styles.cardIcon}>📚</div>
+							<h3 style={styles.cardTitle}>My Bookings</h3>
+							<p style={styles.cardDescription}>
+								View slot requests and confirmed bookings
+							</p>
+						</div>
+
 						<div style={{ ...styles.card, ...styles.disabledCard }}>
 							<div style={styles.cardIcon}>📊</div>
 							<h3 style={styles.cardTitle}>Statistics</h3>
@@ -97,13 +107,14 @@ const Home: React.FC = () => {
 							</p>
 						</div>
 
-						<div style={{ ...styles.card, ...styles.disabledCard }}>
+						<div
+							style={styles.card}
+							onClick={() => navigate('/bookings')}>
 							<div style={styles.cardIcon}>📚</div>
 							<h3 style={styles.cardTitle}>My Bookings</h3>
 							<p style={styles.cardDescription}>
 								View your upcoming and past sessions
 							</p>
-							<span style={styles.comingSoon}>Coming Soon</span>
 						</div>
 					</>
 				)}

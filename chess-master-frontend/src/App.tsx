@@ -6,6 +6,7 @@ import Login from './pages/Login';
 import EditProfile from './pages/EditProfile';
 import Masters from './pages/Masters';
 import MasterScheduleCalendar from './pages/MasterCalender';
+import MyBookings from './pages/MyBookings';
 import Layout from './components/Layout';
 
 const App: React.FC = () => {
@@ -30,6 +31,10 @@ const App: React.FC = () => {
 					<Route
 						path='/calendar/:userId'
 						element={<MasterScheduleCalendar />}
+					/>
+					<Route
+						path='/bookings'
+						element={<MyBookings />}
 					/>
 				</Route>
 				<Route
