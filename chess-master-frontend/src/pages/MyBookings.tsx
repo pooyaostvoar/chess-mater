@@ -49,7 +49,7 @@ const MyBookings: React.FC = () => {
 			case 'reserved':
 				return '#f39c12';
 			case 'booked':
-				return '#e74c3c';
+				return '#27ae60'; // Green for confirmed
 			default:
 				return '#777';
 		}
@@ -118,7 +118,9 @@ const MyBookings: React.FC = () => {
 			) : (
 				<div style={styles.bookingsList}>
 					{bookings.map((booking) => (
-						<div key={booking.id} style={styles.bookingCard}>
+						<div
+							key={booking.id}
+							style={styles.bookingCard}>
 							<div style={styles.cardHeader}>
 								<div style={styles.timeInfo}>
 									<div style={styles.date}>
@@ -126,17 +128,23 @@ const MyBookings: React.FC = () => {
 									</div>
 									<div style={styles.duration}>
 										{new Date(booking.endTime).getHours() -
-											new Date(booking.startTime).getHours()}{' '}
+											new Date(
+												booking.startTime
+											).getHours()}{' '}
 										hour
 										{new Date(booking.endTime).getHours() -
-											new Date(booking.startTime).getHours() !==
-										1 && 's'}
+											new Date(
+												booking.startTime
+											).getHours() !==
+											1 && 's'}
 									</div>
 								</div>
 								<div
 									style={{
 										...styles.statusBadge,
-										background: getStatusColor(booking.status),
+										background: getStatusColor(
+											booking.status
+										),
 									}}>
 									{getStatusLabel(booking.status)}
 								</div>
@@ -152,7 +160,8 @@ const MyBookings: React.FC = () => {
 										</div>
 										<div style={styles.userDetails}>
 											<h3 style={styles.userName}>
-												{booking.reservedBy?.username || 'Unknown User'}
+												{booking.reservedBy?.username ||
+													'Unknown User'}
 											</h3>
 											{booking.reservedBy?.email && (
 												<p style={styles.userEmail}>
@@ -170,9 +179,11 @@ const MyBookings: React.FC = () => {
 										</div>
 										<div style={styles.userDetails}>
 											<h3 style={styles.userName}>
-												{booking.master?.username || 'Unknown Master'}
+												{booking.master?.username ||
+													'Unknown Master'}
 												{booking.master?.title && (
-													<span style={styles.titleTag}>
+													<span
+														style={styles.titleTag}>
 														{' '}
 														{booking.master.title}
 													</span>
@@ -180,7 +191,8 @@ const MyBookings: React.FC = () => {
 											</h3>
 											{booking.master?.rating && (
 												<p style={styles.rating}>
-													Rating: {booking.master.rating}
+													Rating:{' '}
+													{booking.master.rating}
 												</p>
 											)}
 										</div>
@@ -188,11 +200,12 @@ const MyBookings: React.FC = () => {
 								)}
 							</div>
 
-							{booking.status === 'reserved' && !user?.isMaster && (
-								<div style={styles.pendingNote}>
-									⏳ Waiting for master approval
-								</div>
-							)}
+							{booking.status === 'reserved' &&
+								!user?.isMaster && (
+									<div style={styles.pendingNote}>
+										⏳ Waiting for master approval
+									</div>
+								)}
 						</div>
 					))}
 				</div>
@@ -388,4 +401,3 @@ const styles: Record<string, React.CSSProperties> = {
 };
 
 export default MyBookings;
-
