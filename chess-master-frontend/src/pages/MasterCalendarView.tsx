@@ -10,9 +10,12 @@ import SlotModal from '../components/SlotModal';
 
 const MasterCalendarView: React.FC = () => {
 	const { userId } = useParams<{ userId: string }>();
-	const { events, setEvents, refreshSlots } = useScheduleSlots(userId);
+	const { events, setEvents, refreshSlots } = useScheduleSlots(userId, {
+		isMasterView: true,
+	});
 	const [modalVisible, setModalVisible] = useState(false);
 	const [selectedSlotId, setSelectedSlotId] = useState<number | null>(null);
+	const [selectedSlot, setSelectedSlot] = useState<any>(null);
 
 	// Create new slot
 	const handleSelect = async (info: any) => {
@@ -31,6 +34,7 @@ const MasterCalendarView: React.FC = () => {
 	// Open modal to manage slot
 	const handleEventClick = (info: any) => {
 		setSelectedSlotId(Number(info.event.id));
+		setSelectedSlot(info.event.extendedProps?.slot || null);
 		setModalVisible(true);
 	};
 
@@ -78,9 +82,13 @@ const MasterCalendarView: React.FC = () => {
 	const handleStatusChange = (updatedSlot: any) => {
 		setEvents((prev) =>
 			prev.map((e) =>
-				e.id === updatedSlot.id ? mapSlotToEvent(updatedSlot) : e
+				e.id === updatedSlot.id
+					? mapSlotToEvent(updatedSlot, { isMasterView: true })
+					: e
 			)
 		);
+		// Refresh to get updated relations
+		refreshSlots();
 	};
 
 	return (
@@ -99,7 +107,11 @@ const MasterCalendarView: React.FC = () => {
 			<SlotModal
 				visible={modalVisible}
 				slotId={selectedSlotId}
-				onClose={() => setModalVisible(false)}
+				slot={selectedSlot}
+				onClose={() => {
+					setModalVisible(false);
+					setSelectedSlot(null);
+				}}
 				onDeleted={handleDeleted}
 				onStatusChange={handleStatusChange}
 			/>

@@ -25,7 +25,7 @@ const BookCalendarView: React.FC = () => {
 
 		if (
 			!window.confirm(
-				`Book this time slot?\n${info.event.startStr} - ${info.event.endStr}`
+				`Request this time slot?\n${info.event.startStr} - ${info.event.endStr}\n\nThe master will need to approve your request.`
 			)
 		) {
 			return;
@@ -35,7 +35,7 @@ const BookCalendarView: React.FC = () => {
 			await bookSlot(slotId);
 			// Reload slots to update the UI
 			await refreshSlots();
-			alert('Slot booked successfully!');
+			alert('Slot request sent! The master will review your request.');
 		} catch (err: any) {
 			console.error('Failed to book slot', err);
 			alert(

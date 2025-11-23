@@ -37,12 +37,27 @@ slotRouter.get("/user/:userId", async (req, res) => {
 
     const repo = AppDataSource.getRepository(ScheduleSlot);
 
-    const slots = await repo.find({
-      where: { master: { id: userId } },
-      order: { startTime: "ASC" },
+    const slots = await repo
+      .createQueryBuilder("slot")
+      .leftJoinAndSelect("slot.reservedBy", "reservedBy")
+      .where("slot.master = :userId", { userId })
+      .orderBy("slot.startTime", "ASC")
+      .getMany();
+
+    // Format slots to exclude sensitive user data
+    const formattedSlots = slots.map((slot) => {
+      const formatted: any = { ...slot };
+      if (slot.reservedBy) {
+        formatted.reservedBy = {
+          id: slot.reservedBy.id,
+          username: slot.reservedBy.username,
+          email: slot.reservedBy.email,
+        };
+      }
+      return formatted;
     });
 
-    res.json({ success: true, slots });
+    res.json({ success: true, slots: formattedSlots });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Internal server error" });
@@ -106,7 +121,23 @@ slotRouter.post("/:id/reserve", isAuthenticated, async (req, res) => {
 
   await repo.save(slot);
 
-  res.json({ message: "Slot requested", slot });
+  // Reload with relations to return full user info
+  const updatedSlot = await repo
+    .createQueryBuilder("slot")
+    .leftJoinAndSelect("slot.reservedBy", "reservedBy")
+    .where("slot.id = :slotId", { slotId })
+    .getOne();
+
+  // Format to exclude sensitive user data
+  if (updatedSlot?.reservedBy) {
+    (updatedSlot as any).reservedBy = {
+      id: updatedSlot.reservedBy.id,
+      username: updatedSlot.reservedBy.username,
+      email: updatedSlot.reservedBy.email,
+    };
+  }
+
+  res.json({ message: "Slot requested", slot: updatedSlot });
 });
 
 // PATCH /schedule/slot/:id/status
@@ -136,5 +167,21 @@ slotRouter.patch("/:id/status", async (req, res) => {
 
   await repo.save(slot);
 
-  res.json({ message: "Slot status updated", slot });
+  // Reload with relations to return full slot info
+  const updatedSlot = await repo
+    .createQueryBuilder("slot")
+    .leftJoinAndSelect("slot.reservedBy", "reservedBy")
+    .where("slot.id = :slotId", { slotId })
+    .getOne();
+
+  // Format to exclude sensitive user data
+  if (updatedSlot?.reservedBy) {
+    (updatedSlot as any).reservedBy = {
+      id: updatedSlot.reservedBy.id,
+      username: updatedSlot.reservedBy.username,
+      email: updatedSlot.reservedBy.email,
+    };
+  }
+
+  res.json({ message: "Slot status updated", slot: updatedSlot });
 });

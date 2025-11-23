@@ -3,7 +3,7 @@
  */
 export const mapSlotToEvent = (
 	slot: any,
-	options?: { showBookingHint?: boolean }
+	options?: { showBookingHint?: boolean; isMasterView?: boolean }
 ) => {
 	let title = 'Unknown';
 	let color = '#777';
@@ -17,7 +17,12 @@ export const mapSlotToEvent = (
 			break;
 
 		case 'reserved':
-			title = 'Reserved';
+			// Show request info for masters, regular "Reserved" for others
+			if (options?.isMasterView && slot.reservedBy) {
+				title = `Request from ${slot.reservedBy.username || 'User'}`;
+			} else {
+				title = 'Reserved';
+			}
 			color = '#f39c12';
 			break;
 
@@ -35,6 +40,9 @@ export const mapSlotToEvent = (
 		backgroundColor: color,
 		borderColor: color,
 		textColor: '#fff',
+		extendedProps: {
+			slot: slot, // Store full slot data for modal
+		},
 	};
 };
 

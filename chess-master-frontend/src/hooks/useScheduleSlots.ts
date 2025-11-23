@@ -5,6 +5,7 @@ import { mapSlotToEvent } from '../utils/slotUtils';
 
 interface UseScheduleSlotsOptions {
 	showBookingHint?: boolean;
+	isMasterView?: boolean;
 }
 
 export const useScheduleSlots = (
@@ -34,7 +35,10 @@ export const useScheduleSlots = (
 				const slots = res.data.slots || [];
 				setEvents(
 					slots.map((slot: any) =>
-						mapSlotToEvent(slot, { showBookingHint: options?.showBookingHint })
+						mapSlotToEvent(slot, {
+							showBookingHint: options?.showBookingHint,
+							isMasterView: options?.isMasterView,
+						})
 					)
 				);
 				setError(null);
@@ -63,7 +67,10 @@ export const useScheduleSlots = (
 			const slots = res.data.slots || [];
 			setEvents(
 				slots.map((slot: any) =>
-					mapSlotToEvent(slot, { showBookingHint: options?.showBookingHint })
+					mapSlotToEvent(slot, {
+						showBookingHint: options?.showBookingHint,
+						isMasterView: options?.isMasterView,
+					})
 				)
 			);
 		} catch (err) {
