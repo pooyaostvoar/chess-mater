@@ -17,23 +17,25 @@ RUN pnpm install
 # Copy the rest of the source code
 COPY . .
 
+# Set API URL for production
 ENV REACT_APP_API_URL=https://chesswithmasters.com/api
-# Build React app
-RUN pnpm build  # outputs 'build' folder
+
+# Build React app (outputs 'build' folder)
+RUN pnpm build
 
 # -----------------------------
 # Stage 2: Nginx to serve React
 # -----------------------------
 FROM nginx:alpine
 
-# Copy built files from builder
+# Copy React build output
 COPY --from=builder /app/build /usr/share/nginx/html
 
-# Optional: Copy custom nginx config if you have one
-# COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Copy custom Nginx config
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Expose port
-EXPOSE 3000
+# Expose port 80
+EXPOSE 80
 
-# Run nginx
+# Start Nginx
 CMD ["nginx", "-g", "daemon off;"]
