@@ -41,6 +41,18 @@ jobs:
           docker push $BACKEND_IMAGE
 
       # -------------------------
+      # Copy docker-compose.yml to VPS
+      # -------------------------
+      - name: Copy docker-compose.yml to VPS
+        uses: appleboy/scp-action@v0.1.3
+        with:
+          host: ${{ env.VPS_HOST }}
+          username: ${{ env.VPS_USER }}
+          key: ${{ env.VPS_SSH_KEY }}
+          source: "docker-compose.yml"
+          target: "/root/docker-compose.yml"
+
+      # -------------------------
       # SSH to VPS and deploy
       # -------------------------
       - name: Deploy to VPS
