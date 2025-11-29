@@ -23,21 +23,18 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
-      redis:
-        image: redis:7
-        ports:
-          - 6378:6379
-        env:
-          REDIS_PASSWORD: redis-pass
-        options: >-
-          --health-cmd "redis-cli -a redis-pass ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+
+      - name: Start Redis with password
+        run: |
+          docker run -d \
+            --name redis \
+            --network ${{ job.container.network }} \
+            -p 6378:6379 \
+            redis:7 \
+            redis-server --requirepass redis-pass
 
       - name: Install pnpm
         uses: pnpm/action-setup@v2

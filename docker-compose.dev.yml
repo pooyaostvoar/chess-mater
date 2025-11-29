@@ -1,80 +1,77 @@
-name: Backend Tests
+version: "3.9"
 
-on:
-  pull_request:
-    branches:
-      - main
+services:
+  frontend:
+    build:
+      context: ./chess-master-frontend
+      dockerfile: Dockerfile.dev
+    container_name: chess_frontend_dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./chess-master-frontend:/app
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    depends_on:
+      - backend
 
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_USER: chessuser
-          POSTGRES_PASSWORD: chesspass
-          POSTGRES_DB: chess_master_test
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U chessuser -d chess_master_test"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+  backend:
+    build:
+      context: ./chess-master-backend
+      dockerfile: Dockerfile.dev
+    container_name: chess_backend_dev
+    ports:
+      - "3004:3004"
+    volumes:
+      - ./chess-master-backend:/app
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_USER=chessuser
+      - DB_PASS=chesspass
+      - DB_NAME=chess_master
+      - REDIS_URL=redis://:redis-pass@redis:6379
+    depends_on:
+      - db
+      - redis
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+  db:
+    image: postgres:15
+    container_name: chess_db_dev
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=chessuser
+      - POSTGRES_PASSWORD=chesspass
+      - POSTGRES_DB=chess_master
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
-      - name: Start Redis with password
-        run: |
-          docker run -d \
-            --name redis \
-            --network ${{ job.container.network }} \
-            -p 6378:6379 \
-            redis:7 \
-            redis-server --requirepass redis-pass
+  redis:
+    image: redis:7
+    container_name: chess_redis_dev
+    command: ["redis-server", "--requirepass", "redis-pass"]
+    ports:
+      - "6378:6379"
+    volumes:
+      - redis_data:/data
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: chess_pgadmin_dev
+    restart: always
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@example.com
+      - PGADMIN_DEFAULT_PASSWORD=admin
+    ports:
+      - "8080:80"
+    volumes:
+      - ./pgadmin/servers.json:/pgadmin4/servers.json
+    depends_on:
+      - db
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 20
-          cache: "pnpm"
-          cache-dependency-path: "./chess-master-backend/pnpm-lock.yaml"
-
-      - name: Install dependencies
-        working-directory: ./chess-master-backend
-        run: pnpm install
-
-      - name: Set environment variables
-        run: |
-          echo "DB_HOST=localhost" >> $GITHUB_ENV
-          echo "DB_PORT=5432" >> $GITHUB_ENV
-          echo "DB_USER=chessuser" >> $GITHUB_ENV
-          echo "DB_PASS=chesspass" >> $GITHUB_ENV
-          echo "DB_NAME=chess_master_test" >> $GITHUB_ENV
-          echo "REDIS_URL=redis://:redis-pass@localhost:6378" >> $GITHUB_ENV
-          echo "NODE_ENV=test" >> $GITHUB_ENV
-
-      - name: Wait for services
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y redis-tools
-          until pg_isready -h localhost -p 5432 -U chessuser; do
-            echo "Waiting for Postgres..."
-            sleep 2
-          done
-          until redis-cli -a redis-pass -h localhost -p 6378 ping | grep PONG; do
-            echo "Waiting for Redis..."
-            sleep 2
-          done
-
-      - name: Run tests
-        working-directory: ./chess-master-backend
-        run: pnpm test
+volumes:
+  postgres_data:
+  redis_data:
