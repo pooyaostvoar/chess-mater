@@ -39,14 +39,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 20
           cache: "pnpm"
-
-      - name: Install pnpm
-        run: corepack enable && corepack prepare pnpm@latest --activate
+          cache-dependency-path: "./chess-master-backend/pnpm-lock.yaml"
 
       - name: Install dependencies
         working-directory: ./chess-master-backend
