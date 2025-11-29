@@ -4,7 +4,7 @@ RUN npm install -g pnpm
 COPY package.json pnpm-lock.yaml ./
 RUN pnpm install
 COPY . .
-RUN pnpm exec tsc
+RUN pnpm exec tsc --project tsconfig.build.json
 
 FROM node:20-slim
 WORKDIR /app

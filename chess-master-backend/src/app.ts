@@ -1,4 +1,4 @@
-import express, { Express, Request, Response } from "express";
+import express, { Express } from "express";
 import session from "express-session";
 //typeorm
 import "reflect-metadata";

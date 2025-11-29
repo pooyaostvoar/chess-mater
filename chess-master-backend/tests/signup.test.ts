@@ -1,13 +1,10 @@
-import request from "supertest";
-import { createApp } from "../src/app";
 import { AppDataSource } from "../src/database/datasource";
 import { User } from "../src/database/entity/user";
-
-const app = createApp();
+import { unauthAgent } from "./setup";
 
 describe("POST /signup", () => {
   it("creates a new user", async () => {
-    const response = await request(app)
+    const response = await unauthAgent
       .post("/signup")
       .send({ username: "testuser", password: "mypassword" });
 

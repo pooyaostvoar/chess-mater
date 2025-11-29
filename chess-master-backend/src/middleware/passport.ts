@@ -55,7 +55,6 @@ passport.serializeUser(function (user: User, cb: any) {
 
 passport.deserializeUser(function (user: User, cb: any) {
   process.nextTick(function () {
-    console.log("deserializeUser", user);
     return cb(null, user);
   });
 });
