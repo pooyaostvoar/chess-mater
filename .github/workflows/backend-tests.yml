@@ -28,11 +28,11 @@ jobs:
         ports:
           - 6378:6379
         options: >-
-          --requirepass redis-pass
           --health-cmd "redis-cli -a redis-pass ping"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+        command: ["redis-server", "--requirepass", "redis-pass"]
 
     steps:
       - name: Checkout repository
