@@ -14,6 +14,8 @@ import { createClient } from "redis";
 import { usersRouter } from "./api/user/router";
 import { scheduleRouter } from "./api/schedule/router";
 import { readSecret } from "./utils/secret";
+import { adminAuthRouter } from "./api/admin-auth";
+import { adminUsersRouter } from "./api/admin-users";
 
 const isTesting = process.env.NODE_ENV === "test";
 
@@ -33,9 +35,11 @@ app.use(bodyParser.urlencoded({ extended: true, limit: "10mb" }));
 const corsOptions = {
   origin: [
     "http://localhost:3000",
+    "http://localhost:3001",
     "http://localhost:3003",
     "http://localhost:3004",
     "http://185.141.61.15:3000",
+    "http://185.141.61.15:3001",
     "http://185.141.61.15:3003",
     "http://185.141.61.15:3004",
   ],
@@ -78,6 +82,8 @@ app.listen(port, () => {
 
 app.use("", googleRouter);
 app.use("", passwordAuthRouter);
+app.use("/admin", adminAuthRouter);
+app.use("/admin/users", adminUsersRouter);
 app.use("/users", usersRouter);
 app.use("/schedule", scheduleRouter);
 app.use(cookieParser());

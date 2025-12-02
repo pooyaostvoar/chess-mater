@@ -1,5 +1,6 @@
 import { DataSource } from "typeorm";
 import { User } from "./entity/user";
+import { AdminUser } from "./entity/admin-user";
 import { Game } from "./entity/game";
 import { ScheduleSlot } from "./entity/schedule-slots";
 import { MasterPricing } from "./entity/master-pricing";
@@ -11,7 +12,7 @@ export const AppDataSource = new DataSource(
         name: "default",
         type: "better-sqlite3",
         database: ":memory:",
-        entities: [User, Game, ScheduleSlot, MasterPricing],
+        entities: [User, AdminUser, Game, ScheduleSlot, MasterPricing],
         synchronize: true,
         dropSchema: true,
       }
@@ -23,6 +24,6 @@ export const AppDataSource = new DataSource(
         password: readSecret("/run/secrets/postgres_password") || "chesspass",
         database: "chess_master",
         synchronize: true,
-        entities: [User, Game, ScheduleSlot, MasterPricing],
+        entities: [User, AdminUser, Game, ScheduleSlot, MasterPricing],
       }
 );
