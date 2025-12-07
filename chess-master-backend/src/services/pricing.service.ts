@@ -1,6 +1,5 @@
 import { AppDataSource } from "../database/datasource";
 import { MasterPricing } from "../database/entity/master-pricing";
-import { User } from "../database/entity/user";
 
 export interface PricingData {
   price5min?: number | null;
@@ -23,9 +22,11 @@ export interface SafePricing {
 /**
  * Format pricing to exclude sensitive data
  */
-export function formatPricing(pricing: MasterPricing | null): SafePricing | null {
+export function formatPricing(
+  pricing: MasterPricing | null
+): SafePricing | null {
   if (!pricing) return null;
-  
+
   return {
     price5min: pricing.price5min,
     price10min: pricing.price10min,
@@ -43,7 +44,7 @@ export async function getOrCreatePricing(
   masterId: number
 ): Promise<MasterPricing> {
   const pricingRepo = AppDataSource.getRepository(MasterPricing);
-  
+
   let pricing = await pricingRepo.findOne({
     where: { masterId },
   });
@@ -72,7 +73,7 @@ export async function updatePricing(
   data: PricingData
 ): Promise<MasterPricing> {
   const pricingRepo = AppDataSource.getRepository(MasterPricing);
-  
+
   let pricing = await pricingRepo.findOne({
     where: { masterId },
   });
@@ -105,4 +106,3 @@ export async function getPricingByMaster(
     where: { masterId },
   });
 }
-
