@@ -2,9 +2,6 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "types": ["node", "jest", "passport", "express-session"],
-    "paths": {
-      "@chess-master/utils": ["../packages/utils/src"] 
-    }
   },
   "include": ["tests/**/*", "src/**/*"]
 }
