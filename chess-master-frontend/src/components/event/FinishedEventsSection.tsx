@@ -1,10 +1,19 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { FinishedEventCard } from "./FinishedEventCard";
 import { getFinishedEvents } from "../../services/api/schedule.api";
 
-export const FinishedEventsSection: React.FC = () => {
+interface FinishedEventsSectionProps {
+  limit?: number | null;
+  searchPhrase?: string | null;
+}
+
+export const FinishedEventsSection: React.FC<FinishedEventsSectionProps> = ({
+  limit = null,
+  searchPhrase = null,
+}) => {
   const [activeVideo, setActiveVideo] = useState<string | null>(null);
-  const [finishedEvents, setFinishedEvent] = useState([]);
+  const [finishedEvents, setFinishedEvent] = useState<any[]>([]);
+
   async function loadEvents() {
     const res = await getFinishedEvents();
     setFinishedEvent(
@@ -20,14 +29,36 @@ export const FinishedEventsSection: React.FC = () => {
       }))
     );
   }
+
   useEffect(() => {
     loadEvents();
   }, []);
 
+  const filteredEvents = useMemo(() => {
+    let filtered = finishedEvents;
+
+    // Filter by searchPhrase
+    if (searchPhrase && searchPhrase.trim() !== "") {
+      const searchLower = searchPhrase.toLowerCase().trim();
+      filtered = filtered.filter(
+        (event: any) =>
+          event.title?.toLowerCase().includes(searchLower) ||
+          event.master?.username?.toLowerCase().includes(searchLower)
+      );
+    }
+
+    // Apply limit
+    if (limit !== null && limit > 0) {
+      filtered = filtered.slice(0, limit);
+    }
+
+    return filtered;
+  }, [finishedEvents, searchPhrase, limit]);
+
   return (
     <div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-4">
-        {finishedEvents.map((event: any) => (
+        {filteredEvents.map((event: any) => (
           <FinishedEventCard
             key={event.id}
             event={event}

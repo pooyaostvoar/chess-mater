@@ -138,7 +138,7 @@ const Home: React.FC = () => {
             path="/events"
             buttonText="View All Events"
           >
-            <FinishedEventsSection />
+            <FinishedEventsSection limit={3} searchPhrase={null} />
           </HomeSectionWrapper>
         </div>
       ) : (
@@ -159,12 +159,12 @@ const Home: React.FC = () => {
               />
             </HomeSectionWrapper>
             <HomeSectionWrapper
-              title="Finished Events"
+              title="Event Archive"
               description="Watch recordings of past master sessions"
               path="/events"
               buttonText="View All Events"
             >
-              <FinishedEventsSection />
+              <FinishedEventsSection limit={3} searchPhrase={null} />
             </HomeSectionWrapper>
           </div>
           <CTASection />
