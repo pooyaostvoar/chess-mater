@@ -13,6 +13,7 @@ import { UpcomingSessionsSection } from "../components/home/UpcomingSessionsSect
 import { CTASection } from "../components/home/CTASection";
 import { WelcomeSection } from "../components/home/WelcomeSection";
 import { FinishedEventsSection } from "../components/event/FinishedEventsSection";
+import { HomeSectionWrapper } from "../components/home/HomeSectionWrapper";
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
@@ -108,29 +109,63 @@ const Home: React.FC = () => {
         <div className="max-w-7xl mx-auto px-5 py-10">
           {/* <WelcomeSection user={user} /> */}
 
-          <UpcomingSessionsSection
-            bookings={recentBookings}
-            loading={bookingsLoading}
-            currentUser={user}
-          />
-          <RecommendedMastersSection
-            masters={recommendedMasters}
-            loading={loading}
-            onViewSchedule={handleViewSchedule}
-          />
-          <FinishedEventsSection />
+          <HomeSectionWrapper
+            title="Upcoming Sessions"
+            path="/bookings"
+            buttonText="View All"
+          >
+            <UpcomingSessionsSection
+              bookings={recentBookings}
+              loading={bookingsLoading}
+              currentUser={user}
+            />
+          </HomeSectionWrapper>
+          <HomeSectionWrapper
+            title="Recommended Masters"
+            description="Discover talented chess masters to learn from"
+            path="/masters"
+            buttonText="View All Masters"
+          >
+            <RecommendedMastersSection
+              masters={recommendedMasters}
+              loading={loading}
+              onViewSchedule={handleViewSchedule}
+            />
+          </HomeSectionWrapper>
+          <HomeSectionWrapper
+            title="Finished Events"
+            description="Watch recordings of past master sessions"
+            path="/events"
+            buttonText="View All Events"
+          >
+            <FinishedEventsSection />
+          </HomeSectionWrapper>
         </div>
       ) : (
         <>
           <HeroSection />
           <FeaturesSection />
           <div className="max-w-7xl mx-auto px-5 py-16">
-            <TopMastersSection
-              masters={topMasters}
-              loading={loading}
-              onViewSchedule={handleViewSchedule}
-            />
-            <FinishedEventsSection />
+            <HomeSectionWrapper
+              title="Top Rated Masters"
+              description="Meet our highest-rated chess masters"
+              path="/masters"
+              buttonText="View All Masters"
+            >
+              <TopMastersSection
+                masters={topMasters}
+                loading={loading}
+                onViewSchedule={handleViewSchedule}
+              />
+            </HomeSectionWrapper>
+            <HomeSectionWrapper
+              title="Finished Events"
+              description="Watch recordings of past master sessions"
+              path="/events"
+              buttonText="View All Events"
+            >
+              <FinishedEventsSection />
+            </HomeSectionWrapper>
           </div>
           <CTASection />
         </>

@@ -1,7 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { Button } from "../ui/button";
-
-import { ArrowRight } from "lucide-react";
 import { FinishedEventCard } from "./FinishedEventCard";
 import { getFinishedEvents } from "../../services/api/schedule.api";
 
@@ -28,22 +25,7 @@ export const FinishedEventsSection: React.FC = () => {
   }, []);
 
   return (
-    <div className="mb-12">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h2 className="text-2xl md:text-3xl font-bold mb-2">
-            Finished Events
-          </h2>
-          <p className="text-muted-foreground">
-            Watch recordings of past master sessions
-          </p>
-        </div>
-        <Button variant="outline" className="hidden md:flex">
-          View All Events
-          <ArrowRight className="ml-2 h-4 w-4" />
-        </Button>
-      </div>
-
+    <div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-4">
         {finishedEvents.map((event: any) => (
           <FinishedEventCard
@@ -53,10 +35,6 @@ export const FinishedEventsSection: React.FC = () => {
           />
         ))}
       </div>
-
-      <Button variant="outline" size="lg" className="md:hidden w-full">
-        View All Events
-      </Button>
 
       {/* Video Modal */}
       {activeVideo && (

@@ -41,7 +41,7 @@ export const userListSchema = z.array(userSchemaBase);
 
 export const userQuerySchema = z.object({
   username: z.string().min(1).optional(),
-  email: z.string().email().optional(),
+  email: z.string().optional(),
   title: z.string().min(1).optional(),
 
   isMaster: z
