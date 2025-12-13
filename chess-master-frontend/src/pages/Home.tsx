@@ -130,6 +130,7 @@ const Home: React.FC = () => {
               loading={loading}
               onViewSchedule={handleViewSchedule}
             />
+            <FinishedEventsSection />
           </div>
           <CTASection />
         </>
