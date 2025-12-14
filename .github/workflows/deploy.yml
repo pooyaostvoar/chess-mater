@@ -5,13 +5,16 @@ on:
     branches:
       - main
 
+permissions:
+  contents: write # REQUIRED to push tags
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     env:
-      FRONTEND_IMAGE: pooyaos/chess-frontend:latest
-      BACKEND_IMAGE: pooyaos/chess-backend:latest
+      FRONTEND_IMAGE: pooyaos/chess-frontend
+      BACKEND_IMAGE: pooyaos/chess-backend
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
       VPS_HOST: ${{ secrets.VPS_HOST }}
@@ -20,28 +23,71 @@ jobs:
 
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # REQUIRED for tags
+
+      # -------------------------
+      # Create git tag (auto bump)
+      # -------------------------
+      - name: Create version tag
+        id: version
+        run: |
+          git fetch --tags
+          LATEST=$(git tag --sort=-v:refname | head -n 1)
+
+          if [ -z "$LATEST" ]; then
+            NEW_TAG="v1.0.0"
+          else
+            VERSION=${LATEST#v}
+            IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
+            NEW_TAG="v$MAJOR.$MINOR.$((PATCH + 1))"
+          fi
+
+          echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
+          git tag "$NEW_TAG"
+          git push origin "$NEW_TAG"
 
       # -------------------------
       # Build & push frontend
       # -------------------------
       - name: Build and push frontend image
         run: |
+          VERSION=${{ steps.version.outputs.new_tag }}
+          VERSION=${VERSION#v}
+
           docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD
-          docker build -f Dockerfile.frontend -t $FRONTEND_IMAGE .
-          docker push $FRONTEND_IMAGE
+
+          docker build \
+            -f Dockerfile.frontend \
+            -t $FRONTEND_IMAGE:$VERSION \
+            -t $FRONTEND_IMAGE:latest \
+            .
+
+          docker push $FRONTEND_IMAGE:$VERSION
+          docker push $FRONTEND_IMAGE:latest
 
       # -------------------------
       # Build & push backend
       # -------------------------
       - name: Build and push backend image
         run: |
+          VERSION=${{ steps.version.outputs.new_tag }}
+          VERSION=${VERSION#v}
+
           docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD
-          docker build -f Dockerfile.backend -t $BACKEND_IMAGE .
-          docker push $BACKEND_IMAGE
+
+          docker build \
+            -f Dockerfile.backend \
+            -t $BACKEND_IMAGE:$VERSION \
+            -t $BACKEND_IMAGE:latest \
+            .
+
+          docker push $BACKEND_IMAGE:$VERSION
+          docker push $BACKEND_IMAGE:latest
 
       # -------------------------
-      # Copy docker-compose.yml to VPS
+      # Setup SSH
       # -------------------------
       - name: Setup SSH key
         uses: webfactory/ssh-agent@v0.9.1
@@ -50,10 +96,11 @@ jobs:
 
       - name: Copy docker-compose.yml via scp
         run: |
-          scp -o StrictHostKeyChecking=no ./docker-compose.yml ${{ env.VPS_USER }}@${{ env.VPS_HOST }}:/root/docker-compose.yml
+          scp -o StrictHostKeyChecking=no ./docker-compose.yml \
+            ${{ env.VPS_USER }}@${{ env.VPS_HOST }}:/root/docker-compose.yml
 
       # -------------------------
-      # SSH to VPS and deploy
+      # Deploy on VPS
       # -------------------------
       - name: Deploy to VPS
         uses: appleboy/ssh-action@v0.1.8
