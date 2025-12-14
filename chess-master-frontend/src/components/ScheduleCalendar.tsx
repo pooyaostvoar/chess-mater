@@ -1,4 +1,4 @@
-import React, { forwardRef, use, useImperativeHandle } from "react";
+import React, { forwardRef, useImperativeHandle } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
@@ -117,6 +117,9 @@ const ScheduleCalendar = forwardRef<ScheduleCalendarRef, ScheduleCalendarProps>(
           events={events}
           select={onSelect}
           selectAllow={selectAllow}
+          selectMinDistance={isMobile ? 2 : 0}
+          longPressDelay={isMobile ? 150 : 0}
+          unselectAuto={true}
           eventAllow={eventAllow}
           eventClick={onEventClick}
           eventDrop={onEventDrop}
