@@ -135,6 +135,9 @@ importers:
 
   chess-master-frontend:
     dependencies:
+      '@chess-master/schemas':
+        specifier: workspace:*
+        version: link:../packages/schemas
       '@chess-master/utils':
         specifier: workspace:*
         version: link:../packages/utils

@@ -32,7 +32,7 @@ export const userSchemaBase = z.object({
 
   lichessUrl: z.string().nullable(),
 
-  pricing: masterPricingSchema.nullable(),
+  pricing: masterPricingSchema.nullish(),
 
   schedule: z.array(z.any()).nullish(),
 });
