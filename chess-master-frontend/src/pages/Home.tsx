@@ -14,6 +14,7 @@ import { CTASection } from "../components/home/CTASection";
 import { WelcomeSection } from "../components/home/WelcomeSection";
 import { FinishedEventsSection } from "../components/event/FinishedEventsSection";
 import { HomeSectionWrapper } from "../components/home/HomeSectionWrapper";
+import { UpcomingEventsSection } from "../components/event/UpcomingEventsSection";
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
@@ -110,17 +111,25 @@ const Home: React.FC = () => {
       {user ? (
         <div className="max-w-7xl mx-auto px-5 py-10">
           {/* <WelcomeSection user={user} /> */}
-
+          {recentBookings.length > 0 && (
+            <HomeSectionWrapper
+              title="Your Upcoming Sessions"
+              path="/bookings"
+              buttonText="View All Bookings"
+            >
+              <UpcomingSessionsSection
+                bookings={recentBookings}
+                loading={bookingsLoading}
+                currentUser={user}
+              />
+            </HomeSectionWrapper>
+          )}
           <HomeSectionWrapper
-            title="Upcoming Sessions"
-            path="/bookings"
-            buttonText="View All"
+            title="Upcoming Events"
+            path="/upcoming-events"
+            buttonText="View All Events"
           >
-            <UpcomingSessionsSection
-              bookings={recentBookings}
-              loading={bookingsLoading}
-              currentUser={user}
-            />
+            <UpcomingEventsSection limit={3} />
           </HomeSectionWrapper>
           <HomeSectionWrapper
             title="Recommended Masters"
@@ -148,6 +157,13 @@ const Home: React.FC = () => {
           <HeroSection />
           <FeaturesSection />
           <div className="max-w-7xl mx-auto px-5 py-16">
+            <HomeSectionWrapper
+              title="Upcoming Events"
+              path="/upcoming-events"
+              buttonText="View All Events"
+            >
+              <UpcomingEventsSection limit={3} />
+            </HomeSectionWrapper>
             <HomeSectionWrapper
               title="Top Rated Masters"
               description="Meet our highest-rated chess masters"

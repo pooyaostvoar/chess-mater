@@ -5,21 +5,27 @@ import { UpcomingEventCard } from "./UpcomingEventCard";
 import { getUpcomingEvents } from "../../services/api/schedule.api";
 import BookingModal from "../BookingModal";
 
-export const UpcomingEventsSection: React.FC = () => {
+interface UpcomingEventsSectionProps {
+  limit?: number | null;
+}
+
+export const UpcomingEventsSection: React.FC<UpcomingEventsSectionProps> = ({
+  limit,
+}) => {
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
 
-  useEffect(() => {
-    const loadEvents = async () => {
-      try {
-        const data = await getUpcomingEvents();
-        setEvents(data);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const loadEvents = async () => {
+    try {
+      const data = await getUpcomingEvents();
+      limit ? setEvents(data.slice(0, limit)) : setEvents(data);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     loadEvents();
   }, []);
 
@@ -55,8 +61,13 @@ export const UpcomingEventsSection: React.FC = () => {
       <BookingModal
         slotId={selectedEventId}
         visible={Boolean(selectedEventId)}
-        onClose={() => setSelectedEventId(null)}
-        onBooked={() => setSelectedEventId(null)}
+        onClose={() => {
+          setSelectedEventId(null);
+        }}
+        onBooked={() => {
+          setSelectedEventId(null);
+          loadEvents();
+        }}
       />
     </div>
   );

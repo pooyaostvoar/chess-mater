@@ -4,6 +4,7 @@ import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Clock, DollarSign } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useUser } from "../../contexts/UserContext";
 
 interface Props {
   event: any;
@@ -12,7 +13,7 @@ interface Props {
 
 export const UpcomingEventCard: React.FC<Props> = ({ event, onClick }) => {
   const navigate = useNavigate();
-
+  const { user, loading: isUserloading } = useUser();
   const start = new Date(event.startTime);
   const end = new Date(event.endTime);
   const durationMinutes = (end.getTime() - start.getTime()) / 60000;
@@ -57,7 +58,16 @@ export const UpcomingEventCard: React.FC<Props> = ({ event, onClick }) => {
         </div>
 
         {/* Book Button */}
-        <Button className="w-full" onClick={() => onClick()}>
+        <Button
+          className="w-full"
+          onClick={() => {
+            if (!user && !isUserloading) {
+              navigate("/login");
+              return;
+            }
+            onClick();
+          }}
+        >
           Book Now
         </Button>
       </CardContent>
