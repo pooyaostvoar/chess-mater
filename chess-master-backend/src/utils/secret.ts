@@ -14,9 +14,9 @@ export function getGoogleCleintID() {
     return googleClientIDCache;
   }
   googleClientIDCache = readSecret("/run/secrets/google_client_id");
-  if (!googleClientIDCache) {
-    throw new Error("Google Client ID not found in secrets");
-  }
+  // if (!googleClientIDCache) {
+  //   throw new Error("Google Client ID not found in secrets");
+  // }
   return googleClientIDCache;
 }
 
@@ -26,8 +26,8 @@ export function getGoogleClientSecret() {
     return secretCache;
   }
   secretCache = readSecret("/run/secrets/google_client_secret");
-  if (!secretCache) {
-    throw new Error("Google Client Secret not found in secrets");
-  }
+  // if (!secretCache) {
+  //   throw new Error("Google Client Secret not found in secrets");
+  // }
   return secretCache;
 }
