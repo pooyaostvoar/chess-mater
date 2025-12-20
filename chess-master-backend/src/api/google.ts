@@ -17,7 +17,7 @@ googleRouter.get(
     // console.log("Google login successful redirect to home");
     // Successful login
     const redirectUrl =
-      process.env.NODE_ENV === "production"
+      process.env.ENV === "production"
         ? "https://chesswithmasters.com/home"
         : "http://localhost:3000/home";
     res.redirect(redirectUrl); // or redirect to your frontend
