@@ -21,11 +21,7 @@ export const FinishedEventsSection: React.FC<FinishedEventsSectionProps> = ({
         id: event.id,
         title: event.title,
         youtubeId: event.youtubeId,
-        master: {
-          id: event.master.id,
-          username: event.master.username,
-          profilePicture: event.master.profilePicture,
-        },
+        master: event.master,
       }))
     );
   }

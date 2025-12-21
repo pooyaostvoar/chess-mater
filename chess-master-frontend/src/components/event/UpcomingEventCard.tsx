@@ -1,10 +1,11 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { Badge } from "../ui/badge";
+
 import { Button } from "../ui/button";
 import { Clock, DollarSign } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../../contexts/UserContext";
+import { AccountHeader } from "../profile/AccountHeader";
 
 interface Props {
   event: any;
@@ -21,29 +22,10 @@ export const UpcomingEventCard: React.FC<Props> = ({ event, onClick }) => {
   return (
     <Card className="hover:shadow-lg transition-shadow">
       <CardHeader>
-        <div className="flex items-center gap-4 mb-3">
-          {event.master.profilePicture ? (
-            <img
-              src={event.master.profilePicture}
-              alt={event.master.username}
-              className="w-12 h-12 rounded-full object-cover border"
-            />
-          ) : (
-            <div className="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center font-bold">
-              {event.master.username.charAt(0)}
-            </div>
-          )}
-
-          <div>
-            <CardTitle className="text-lg">
-              {event.title || "Live Chess Session"}
-            </CardTitle>
-            <Badge variant="outline" className="mt-1">
-              {event.master.username}
-            </Badge>
-          </div>
-        </div>
-
+        <CardTitle className="text-xl m-1">
+          {event.title ?? "Blitz session"}
+        </CardTitle>
+        <AccountHeader user={event.master} />
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Clock className="h-4 w-4" />
           {start.toLocaleString()} · {durationMinutes} min
