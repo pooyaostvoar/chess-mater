@@ -71,3 +71,9 @@ export const findUsers = async (filters: {
     throw new Error(handleApiError(error));
   }
 };
+
+export const getPublicUser = async (userId: number) => {
+  const res = await apiClient.get(`/users/${userId}`);
+  if (!res.data.user) throw new Error("User not found");
+  return res.data.user;
+};

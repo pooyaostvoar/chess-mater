@@ -9,17 +9,17 @@ export const userSchemaBase = z.object({
 
   isMaster: z.boolean().default(false),
 
-  title: z.string().nullable(),
+  title: z.string().nullish(),
 
-  rating: z.number().int().nullable(),
+  rating: z.number().int().nullish(),
 
-  bio: z.string().nullable(),
+  bio: z.string().nullish(),
 
-  profilePicture: z.url().nullable(),
+  profilePicture: z.url().nullish(),
 
-  chesscomUrl: z.string().nullable(),
+  chesscomUrl: z.string().nullish(),
 
-  lichessUrl: z.string().nullable(),
+  lichessUrl: z.string().nullish(),
 
   schedule: z.array(z.any()).nullish(),
 

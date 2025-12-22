@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { CardTitle } from "../ui/card";
 import { Badge } from "../ui/badge";
 import type { User } from "../../services/auth";
@@ -9,7 +10,10 @@ interface MasterCardProps {
 
 export const AccountHeader: React.FC<MasterCardProps> = ({ user }) => {
   return (
-    <div className="flex items-center gap-4 mb-4">
+    <Link
+      to={`/users/${user.id}`}
+      className="flex items-center gap-4 mb-4 hover:opacity-90 transition"
+    >
       {user.profilePicture ? (
         <img
           src={user.profilePicture}
@@ -21,6 +25,7 @@ export const AccountHeader: React.FC<MasterCardProps> = ({ user }) => {
           {user.username.charAt(0).toUpperCase()}
         </div>
       )}
+
       <div className="flex-1">
         <CardTitle className="text-xl">{user.username}</CardTitle>
         {user.title && (
@@ -29,6 +34,6 @@ export const AccountHeader: React.FC<MasterCardProps> = ({ user }) => {
           </Badge>
         )}
       </div>
-    </div>
+    </Link>
   );
 };

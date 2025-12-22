@@ -12,6 +12,7 @@ import Layout from "./components/Layout";
 import FinishedEvents from "./pages/FinishedEvents";
 import EditSlot from "./pages/EditSlot";
 import { UpcomingEventsPage } from "./pages/UpcomingEvents";
+import PublicUserProfile from "./pages/PublicUserProfile";
 
 const App: React.FC = () => {
   return (
@@ -31,6 +32,7 @@ const App: React.FC = () => {
           <Route path="/events" element={<FinishedEvents />} />
           <Route path="/events/:id/edit" element={<EditSlot />} />
           <Route path="/upcoming-events" element={<UpcomingEventsPage />} />
+          <Route path="/users/:id" element={<PublicUserProfile />} />
         </Route>
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
