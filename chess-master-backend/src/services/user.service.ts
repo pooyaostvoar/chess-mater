@@ -12,6 +12,7 @@ export interface UpdateUserData {
   chesscomUrl?: string | null;
   lichessUrl?: string | null;
   hourlyRate?: number | null;
+  languages?: string[] | null;
 }
 
 export interface UserFilters {
@@ -35,6 +36,7 @@ export interface SafeUser {
   chesscomUrl: string | null;
   lichessUrl: string | null;
   hourlyRate: number | null;
+  languages?: string[] | null;
 }
 
 /**
@@ -53,6 +55,7 @@ export function formatUser(user: User): SafeUser {
     chesscomUrl: user.chesscomUrl,
     lichessUrl: user.lichessUrl,
     hourlyRate: user.hourlyRate,
+    languages: user.languages,
   };
 }
 
@@ -132,6 +135,9 @@ export async function updateUser(
   if (data.lichessUrl !== undefined) user.lichessUrl = data.lichessUrl;
   if (data.hourlyRate !== undefined) {
     user.hourlyRate = data.hourlyRate;
+  }
+  if (data.languages !== undefined) {
+    user.languages = data.languages;
   }
 
   await userRepo.save(user);

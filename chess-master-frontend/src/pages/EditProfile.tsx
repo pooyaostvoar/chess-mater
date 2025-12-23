@@ -16,6 +16,7 @@ import { ChessProfileSection } from "../components/profile/ChessProfileSection";
 import { ChessPlatformSection } from "../components/profile/ChessPlatformSection";
 import { PricingSection } from "../components/profile/PricingSection";
 import { AccountTypeSection } from "../components/profile/AccountTypeSection";
+import { LanguagesSection } from "../components/profile/LanguagesSection";
 
 const EditProfile: React.FC = () => {
   const [formData, setFormData] = useState<any>(null);
@@ -131,6 +132,7 @@ const EditProfile: React.FC = () => {
         chesscomUrl: formData.chesscomUrl,
         lichessUrl: formData.lichessUrl,
         hourlyRate: formData.hourlyRate,
+        languages: formData.languages,
       });
 
       if (data.status === "success") {
@@ -185,6 +187,12 @@ const EditProfile: React.FC = () => {
               title={formData.title}
               rating={formData.rating}
               bio={formData.bio}
+              onChange={handleChange}
+            />
+
+            <LanguagesSection
+              name="languages"
+              languages={formData.languages ?? []}
               onChange={handleChange}
             />
 

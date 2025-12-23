@@ -11,6 +11,7 @@ export interface UpdateUserData {
   chesscomUrl?: string | null;
   lichessUrl?: string | null;
   hourlyRate?: number | null;
+  languages?: string[] | null;
 }
 
 export interface User {
@@ -25,6 +26,7 @@ export interface User {
   chesscomUrl?: string | null;
   lichessUrl?: string | null;
   hourlyRate?: number | null;
+  languages?: string[] | null;
 }
 
 /**

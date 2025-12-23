@@ -58,6 +58,9 @@ export class User {
   @Column("text", { nullable: true })
   googleId?: string | null;
 
+  @Column("text", { array: true, nullable: true })
+  languages?: string[] | null;
+
   @Column({
     type: "decimal",
     precision: 10,

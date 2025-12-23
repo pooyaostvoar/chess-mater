@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   Card,
   CardContent,
@@ -12,6 +12,7 @@ import { Badge } from "../components/ui/badge";
 import { getPublicUser } from "../services/api/user.api";
 
 const PublicUserProfile: React.FC = () => {
+  const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -102,6 +103,16 @@ const PublicUserProfile: React.FC = () => {
             </div>
           )}
 
+          {/* LANGUAGE */}
+          {user.languages && (
+            <div className="space-y-2">
+              <h3 className="font-semibold text-primary">Languages</h3>
+              <p className="text-muted-foreground whitespace-pre-line leading-relaxed">
+                {user.languages.join(", ")}
+              </p>
+            </div>
+          )}
+
           {/* BIO */}
           {user.bio && (
             <div className="space-y-2">
@@ -157,6 +168,25 @@ const PublicUserProfile: React.FC = () => {
               </p>
             </div>
           )}
+          {/* ACTION BUTTONS */}
+          <div className="flex flex-wrap justify-center gap-3 px-6 pb-6">
+            <Button onClick={() => {}}>Send Message</Button>
+
+            {user.isMaster && (
+              <>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    navigate(`/calendar/${user.id}`);
+                  }}
+                >
+                  View Schedule
+                </Button>
+
+                <Button variant="secondary">Recorded Lessons</Button>
+              </>
+            )}
+          </div>
         </CardContent>
       </Card>
     </div>

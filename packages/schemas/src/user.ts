@@ -24,6 +24,8 @@ export const userSchemaBase = z.object({
   schedule: z.array(z.any()).nullish(),
 
   hourlyRate: z.number().nullish(),
+
+  languages: z.array(z.string()).nullish(),
 });
 
 export const userListSchema = z.array(userSchemaBase);
