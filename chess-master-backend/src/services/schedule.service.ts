@@ -17,6 +17,7 @@ export interface CreateSlotData {
 
 export interface SafeSlot {
   id: number;
+  title?: string | null;
   startTime: Date;
   endTime: Date;
   status: SlotStatus;
@@ -36,6 +37,7 @@ export interface SafeSlot {
     email: string;
     profilePicture: string | null;
   } | null;
+  price: number | null;
 }
 
 /**
@@ -47,6 +49,8 @@ export function formatSlot(slot: ScheduleSlot): SafeSlot {
     startTime: slot.startTime,
     endTime: slot.endTime,
     status: slot.status as SlotStatus,
+    price: slot.price,
+    title: slot.title,
   };
 
   if (slot.master) {
@@ -225,6 +229,7 @@ export async function updateSlot(
     endTime?: Date;
     title?: string;
     youtubeId?: string;
+    price?: number | null;
   }
 ): Promise<ScheduleSlot> {
   const repo = AppDataSource.getRepository(ScheduleSlot);

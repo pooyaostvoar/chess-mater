@@ -9,6 +9,7 @@ import ScheduleCalendar, {
 import MiniCalendar from "../components/calendar/MiniCalendar";
 import SlotModal from "../components/SlotModal";
 import { useIsMobile } from "../hooks/useIsMobile";
+import EditSlotModal from "../components/slots/EditSlotModal";
 
 const MasterCalendarView: React.FC = () => {
   const isMobile = useIsMobile();
@@ -17,6 +18,7 @@ const MasterCalendarView: React.FC = () => {
     isMasterView: true,
   });
   const [modalVisible, setModalVisible] = useState(false);
+  const [isEditSlotModalVisible, setIsEditSlotModalVisible] = useState(false);
   const [selectedSlotId, setSelectedSlotId] = useState<number | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<any>(null);
   const calendarRef = useRef<ScheduleCalendarRef>(null);
@@ -82,7 +84,10 @@ const MasterCalendarView: React.FC = () => {
         endTime: info.endStr,
       });
       const newSlot = res.slot;
+
       setEvents((prev) => [...prev, mapSlotToEvent(newSlot)]);
+      setSelectedSlotId(newSlot.id);
+      setIsEditSlotModalVisible(true);
     } catch (err: any) {
       console.error("Failed to create slot", err);
       alert(
@@ -220,6 +225,15 @@ const MasterCalendarView: React.FC = () => {
         }}
         onDeleted={handleDeleted}
         onStatusChange={handleStatusChange}
+      />
+      <EditSlotModal
+        visible={isEditSlotModalVisible}
+        slotId={selectedSlotId}
+        onClose={() => {
+          setSelectedSlotId(null);
+          setIsEditSlotModalVisible(false);
+          refreshSlots();
+        }}
       />
     </div>
   );

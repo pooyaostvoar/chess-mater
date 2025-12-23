@@ -36,7 +36,7 @@ export const UpcomingEventCard: React.FC<Props> = ({ event, onClick }) => {
         {/* Price */}
         <div className="flex items-center gap-2">
           <DollarSign className="h-4 w-4 text-primary" />
-          <span className="text-lg font-semibold">${10}</span>
+          <span className="text-lg font-semibold">${event.price ?? 0}</span>
         </div>
 
         {/* Book Button */}

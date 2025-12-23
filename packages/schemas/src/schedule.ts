@@ -25,4 +25,6 @@ export const scheduleSlotSchema = z.object({
   youtubeId: z.string().nullable(),
 
   reservedBy: userSchemaBase.nullish(),
+
+  price: z.number().nullish(),
 });
