@@ -7,7 +7,7 @@ import {
   CardTitle,
 } from "../components/ui/card";
 import { Button } from "../components/ui/button";
-import { API_URL } from "../services/config";
+import { SOCKET_URL } from "../services/config";
 import { usePublicUser } from "../hooks/usePublicUser";
 
 interface Message {
@@ -35,7 +35,7 @@ const Chat: React.FC<ChatProps> = ({ otherUserId, userId }) => {
 
   useEffect(() => {
     console.log("Connecting to socket...");
-    const socket = io(API_URL, { withCredentials: true });
+    const socket = io(SOCKET_URL, { withCredentials: true });
     console.log("Socket connected:");
     socketRef.current = socket;
 
