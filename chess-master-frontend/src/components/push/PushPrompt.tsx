@@ -8,7 +8,7 @@ export function PushPrompt() {
     "Notification" in window &&
     Notification.permission === "default" &&
     !localStorage.getItem("push_prompt_shown");
-  console.log("PushPrompt show:", show);
+
   if (!show || answered === true) return null;
 
   const onEnable = async () => {

@@ -1,11 +1,11 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "../ui/card";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { DollarSign, Clock } from "lucide-react";
 
 interface PricingSectionProps {
-  pricing: number | null;
+  pricing: number;
   onPricingChange: (value: number | null) => void;
 }
 
@@ -13,6 +13,8 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
   pricing,
   onPricingChange,
 }) => {
+  const [inputValue, setInputValue] = useState(pricing?.toString() || "");
+
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2 mb-2">
@@ -34,17 +36,17 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
                 $
               </span>
               <Input
-                // id={key}
                 type="number"
                 name="hourlyRate"
-                value={pricing || 0}
+                value={inputValue}
                 onChange={(e) => {
-                  const value =
-                    e.target.value === "" ? null : parseFloat(e.target.value);
-                  onPricingChange(value);
+                  const value = e.target.value;
+                  setInputValue(value);
+
+                  const numValue = value === "" ? null : parseFloat(value);
+                  onPricingChange(numValue);
                 }}
                 placeholder="0.00"
-                min="0"
                 step="0.01"
                 className="pl-7"
               />

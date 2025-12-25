@@ -82,7 +82,7 @@ const Home: React.FC = () => {
               if (aRating !== bRating) return bRating - aRating;
               return a.id - b.id;
             })
-            .slice(0, 6);
+            .slice(0, 3);
 
           setRecommendedMasters(recommended);
         }
