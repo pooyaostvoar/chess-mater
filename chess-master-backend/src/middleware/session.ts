@@ -3,11 +3,12 @@ import RedisStore from "connect-redis";
 import { createClient } from "redis";
 import { readSecret } from "../utils/secret";
 
+console.log("DEBUG: REDIS_URL in session.ts:", process.env.REDIS_URL, "NODE_ENV:", process.env.NODE_ENV);
 const redisClient = createClient({
   url:
     readSecret("/run/secrets/redis_url") ||
     process.env.REDIS_URL ||
-    "redis://localhost:6378",
+    "redis://:redis-pass@localhost:6378",
 });
 
 redisClient.connect().catch(console.error);
