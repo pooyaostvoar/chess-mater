@@ -2,6 +2,7 @@ import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import Chat from "../components/Chat";
+import ChatWrapper from "../components/ChatWrapper";
 import { useUser } from "../contexts/UserContext";
 
 const ChatPage: React.FC = () => {
@@ -13,7 +14,17 @@ const ChatPage: React.FC = () => {
     return null;
   }
   return user?.id ? (
-    <Chat userId={user?.id!} otherUserId={Number(otherUserId)} />
+    <ChatWrapper>
+      {otherUserId ? (
+        <Chat userId={user?.id!} otherUserId={Number(otherUserId)} />
+      ) : (
+        <div className="flex flex-col items-center justify-center h-full text-gray-500">
+          <span className="text-4xl mb-4">💬</span>
+          <p className="text-lg font-medium">Select a conversation</p>
+          <p className="text-sm">Choose a user from the list to start chatting</p>
+        </div>
+      )}
+    </ChatWrapper>
   ) : null;
 };
 

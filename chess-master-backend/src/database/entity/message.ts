@@ -12,9 +12,11 @@ export class Message {
   @PrimaryGeneratedColumn({ type: "int" })
   id: number;
 
+  @Index()
   @Column({ type: "int" })
   fromUserId: number;
 
+  @Index()
   @Column({ type: "int" })
   toUserId: number;
 

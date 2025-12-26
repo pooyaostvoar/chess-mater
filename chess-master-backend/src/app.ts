@@ -22,6 +22,7 @@ import { sessionMiddleware } from "./middleware/session";
 import http from "http";
 import { initSocket } from "./socket";
 import pushRouter from "./api/push";
+import { messagesRouter } from "./api/messages/router";
 
 export function createApp() {
   const isTesting = process.env.NODE_ENV === "test";
@@ -70,6 +71,7 @@ export function createApp() {
   app.use("/users", usersRouter);
   app.use("/schedule", scheduleRouter);
   app.use("/push", pushRouter);
+  app.use("/messages", messagesRouter);
   app.use(cookieParser());
   return app;
 }

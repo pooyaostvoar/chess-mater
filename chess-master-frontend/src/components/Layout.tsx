@@ -103,6 +103,10 @@ const Layout: React.FC = () => {
                       <LayoutDashboard className="mr-2 h-4 w-4" />
                       <span>Dashboard</span>
                     </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate("/chat")}>
+                      <span className="mr-2 text-lg">💬</span>
+                      <span>Messages</span>
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate("/edit-profile")}>
                       <User className="mr-2 h-4 w-4" />
                       <span>Edit Profile</span>

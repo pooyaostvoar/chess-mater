@@ -39,6 +39,7 @@ const App: React.FC = () => {
             <Route path="/events/:id/edit" element={<EditSlot />} />
             <Route path="/upcoming-events" element={<UpcomingEventsPage />} />
             <Route path="/users/:id" element={<PublicUserProfile />} />
+            <Route path="/chat" element={<ChatPage />} />
             <Route path="/chat/:otherUserId" element={<ChatPage />} />
           </Route>
           <Route path="/signup" element={<Signup />} />
